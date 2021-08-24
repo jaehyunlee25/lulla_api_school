@@ -23,7 +23,7 @@ export default async function handler(req, res) {
   return true;
 }
 async function post(req, res) {
-  const qUserId = await getUserIdFromToken(req.headers.authoriztion);
+  const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') qUserId.onError(res, '3.1.2');
   const userId = qUserId.message;
 
