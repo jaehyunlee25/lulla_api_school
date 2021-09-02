@@ -25,6 +25,7 @@ export default async function handler(req, res) {
     return ERROR(res, {
       id: 'ERR.school.index.3',
       message: 'server logic error',
+      error: e.toString(),
     });
   }
   return true;
@@ -93,20 +94,19 @@ async function post(req, res) {
   if (qSchool.type === 'error')
     return qSchool.onError(res, '3.2.1', 'creating school');
 
+  // #4. 원을 생성한 원장의 권한을 수집하여 기록한다.
+  // tables related :: permissions, permission_members
+  //
 
-
-
-
-  // #4.
   return RESPOND(res, {
     userId,
     resultCode: 200,
   });
 }
-async function get() {
+async function get(req, res) {
   // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1.2');
   const userId = qUserId.message;
-  return true;
+  return userId;
 }
