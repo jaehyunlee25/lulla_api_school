@@ -1,4 +1,5 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
+import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -6,6 +7,8 @@ const QTS = {
   getIBI: 'getInstitutionById',
   getSBII: 'getSchoolByInstitutionId',
   newSchool: 'newSchool',
+  newSR: 'newSchoolRole',
+  newMember: 'newMember',
 };
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -18,6 +21,7 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
+  setBaseURL('sqls/school/school'); // 끝에 슬래시 붙이지 마시오.
   try {
     if (req.method === 'POST') return await post(req, res);
     if (req.method === 'GET') return await get(req, res);
@@ -42,6 +46,8 @@ async function post(req, res) {
     institutionsId,
     userId,
     description,
+    roleName,
+    roleDescription,
   } = req.body;
   // #3.1.1. 전화번호를 이용해 이미 등록된 원인지 파악한다.
   tel = tel.replace(/-/g, '');
@@ -70,7 +76,7 @@ async function post(req, res) {
   }
   // #3.1.3.
   if (institution) {
-    const qSBII = await QTS.getSBII.fQuery({ institutions_id: institutionsId });
+    const qSBII = await QTS.getSBII.fQuery({ institutionsId });
     if (qSBII.type === 'error')
       return qSBII.onError(res, '3.1.3', 'getting school');
     if (qSBII.message.rows.length > 0)
@@ -93,13 +99,36 @@ async function post(req, res) {
   });
   if (qSchool.type === 'error')
     return qSchool.onError(res, '3.2.1', 'creating school');
-
-  // #4. 원을 생성한 원장의 권한을 수집하여 기록한다.
-  // tables related :: permissions, permission_members
+  const schoolId = qSchool.message.rows[0].id;
+  // #3.3.1. 원장의 롤을 기록하고, id를 얻어온다. school_role
+  const qSR = await QTS.newSR.fQuery({
+    schoolId,
+    grade: 1,
+    name: roleName,
+    description: roleDescription,
+  });
+  if (qSR.type === 'error') return qSR.onError(res, '3.3.1', 'creating role');
+  const schoolRoleId = qSR.message.rows[0].id;
+  // $5. 원장의 프로필을 생성한다. members
+  const qNM = await QTS.newMember.fQuery({
+    nickname: roleName,
+    description: '',
+    userId,
+    schoolId,
+    schoolRoleId,
+    relation: '',
+    is_active: true,
+    is_admin: true,
+  });
+  if (qNM.type === 'error')
+    return qNM.onError(res, '3.3.1', 'creating member profile');
+  const memberId = qNM.message.rows[0].id;
+  // tables related :: permissions, permission_members, school_roles, members
   //
 
   return RESPOND(res, {
-    userId,
+    schoolId,
+    memberId,
     resultCode: 200,
   });
 }
