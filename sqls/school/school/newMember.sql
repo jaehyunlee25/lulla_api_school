@@ -1,5 +1,5 @@
 insert into
-    member(
+    members(
         id, -- uuid NOT NULL,
         nickname, -- character varying(255) COLLATE pg_catalog."default",
         description, -- character varying(255) COLLATE pg_catalog."default" DEFAULT ''::character varying,

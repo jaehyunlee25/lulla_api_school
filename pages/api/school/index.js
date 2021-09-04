@@ -7,8 +7,15 @@ const QTS = {
   getIBI: 'getInstitutionById',
   getSBII: 'getSchoolByInstitutionId',
   newSchool: 'newSchool',
+  delSchool: 'delSchool',
   newSR: 'newSchoolRole',
+  delSR: 'delSchoolRole',
   newMember: 'newMember',
+  getPBG: 'getPermissionsByGrade',
+  getPS: 'getPostShare',
+  newMP: 'newMemberPermissions',
+  getSMFG1: 'getSchoolMemberForGrade1',
+  getSchoolDetail: 'getSchoolDetailForGrade1',
 };
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -100,16 +107,20 @@ async function post(req, res) {
   if (qSchool.type === 'error')
     return qSchool.onError(res, '3.2.1', 'creating school');
   const schoolId = qSchool.message.rows[0].id;
-  // #3.3.1. 원장의 롤을 기록하고, id를 얻어온다. school_role
+
+  // #3.2.2. 원장의 롤을 기록하고, id를 얻어온다. school_role
   const qSR = await QTS.newSR.fQuery({
     schoolId,
     grade: 1,
     name: roleName,
     description: roleDescription,
   });
-  if (qSR.type === 'error') return qSR.onError(res, '3.3.1', 'creating role');
+  if (qSR.type === 'error') {
+    await QTS.delSchool.fQuery({ schoolId });
+    return qSR.onError(res, '3.2.2', 'creating role');
+  }
   const schoolRoleId = qSR.message.rows[0].id;
-  // $5. 원장의 프로필을 생성한다. members
+  // #3.2.3. 원장의 프로필을 생성한다. members
   const qNM = await QTS.newMember.fQuery({
     nickname: roleName,
     description: '',
@@ -120,15 +131,65 @@ async function post(req, res) {
     is_active: true,
     is_admin: true,
   });
-  if (qNM.type === 'error')
-    return qNM.onError(res, '3.3.1', 'creating member profile');
+  if (qNM.type === 'error') {
+    // delete 순서가 바뀌면 안 됨(delSR -> delSchool 순).
+    await QTS.delSR.fQuery({ schoolRoleId });
+    await QTS.delSchool.fQuery({ schoolId });
+    return qNM.onError(res, '3.2.3', 'creating member profile');
+  }
   const memberId = qNM.message.rows[0].id;
+
+  // #3.3.1 원장의 권한 id를 불러온다.
   // tables related :: permissions, permission_members, school_roles, members
-  //
+  const qPBG = await QTS.getPBG.fQuery({ grade: 1 });
+  if (qPBG.type === 'error')
+    return qPBG.onError(res, '3.3.1', 'searching permissions');
+  const permissions = qPBG.message.rows[0].ids.split(',');
+
+  // #3.3.2 post share 권한을 부여한다.
+  // type :
+  // 1. post, 2. album, 3. quickview,
+  // 4. announcement, 5. handover, 6. requestdrug, 7. attendance
+  // action : 1. create, 2. read, 3. update, 4. delete, 5. share
+
+  // type_1 = post, action_5 = share, grade_2 = teacher
+  const qPS = await QTS.getPS.fQuery({ type: 1, action: 5, grade: 2 });
+  if (qPS.type === 'error')
+    return qPS.onError(res, '3.3.2', 'searching post share');
+  const ps = qPS.message.rows[0].id;
+  permissions.push(ps);
+
+  // #3.3.3 member_permissions 에 추가한다.
+  const qMP = await QTS.newMP.fQuery({
+    memberId,
+    schoolId,
+    grade: 1,
+    permissions: ['{', permissions.join(','), '}'].join(''),
+  });
+  if (qMP.type === 'error')
+    return qMP.onError(res, '3.3.3', 'insert member permissions');
+
+  // #3.4.1 프로필 상세정보 조회
+  const qSMFG1 = await QTS.getSMFG1.fQuery({ memberId });
+  if (qSMFG1.type === 'error')
+    return qSMFG1.onError(res, '3.4.1', 'get school member detail');
+  const schoolMember = qSMFG1.message.rows[0];
+
+  // #3.4.2 학원 상세정보 조회
+  const qSchoolDetail = await QTS.getSchoolDetail.fQuery({ schoolId });
+  if (qSchoolDetail.type === 'error')
+    return qSchoolDetail.onError(res, '3.4.2', 'get school detail');
+  if (qSchoolDetail.message.rows.length === 0)
+    return ERROR(res, {
+      resultCode: 204,
+      id: 'ERR.school.index.3.1.1',
+      message: '해당하는 원 정보가 존재하지 않습니다.',
+    });
+  const school = qSchoolDetail.message.rows[0];
 
   return RESPOND(res, {
-    schoolId,
-    memberId,
+    school,
+    schoolMember,
     resultCode: 200,
   });
 }
