@@ -1,0 +1,36 @@
+insert into
+    member(
+        id, -- uuid NOT NULL,
+        nickname, -- character varying(255) COLLATE pg_catalog."default",
+        description, -- character varying(255) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+        created_at, -- timestamp with time zone NOT NULL,
+        updated_at, -- timestamp with time zone NOT NULL,
+        user_id, -- uuid,
+        -- kid_id, -- uuid,
+        -- class_id, -- uuid,
+        school_id, -- uuid,
+        school_role_id, -- uuid,
+        relation, -- character varying(255) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+        is_active, -- boolean DEFAULT true,
+        is_admin -- boolean DEFAULT false,
+        -- image_id, -- uuid,
+        -- background_image_id -- uuid,
+    )
+values(
+    uuid_generate_v1(), -- uuid NOT NULL,
+    '${nickname}', -- character varying(255) COLLATE pg_catalog."default",
+    '${description}', -- character varying(255) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+    now(), -- timestamp with time zone NOT NULL,
+    now(), -- timestamp with time zone NOT NULL,
+    '${userId}', -- uuid,
+    -- '${kid_id}', -- uuid,
+    -- '${class_id}', -- uuid,
+    '${schoolId}', -- uuid,
+    '${schoolRoleId}', -- uuid,
+    '${relation}', -- character varying(255) COLLATE pg_catalog."default" DEFAULT ''::character varying,
+    ${is_active}, -- boolean DEFAULT true,
+    ${is_admin} -- boolean DEFAULT false,
+    -- '${image_id}', -- uuid,
+    -- '${background_image_id}' -- uuid,
+)
+returning id;
