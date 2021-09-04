@@ -93,10 +93,6 @@ async function post(req, res) {
   if (qSchool.type === 'error')
     return qSchool.onError(res, '3.2.1', 'creating school');
 
-
-
-
-
   // #4.
   return RESPOND(res, {
     userId,
