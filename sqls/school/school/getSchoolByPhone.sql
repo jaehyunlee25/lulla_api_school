@@ -3,4 +3,5 @@ select
 from
     schools
 where
-    tel='${tel}';
+    activated = true
+    and tel='${tel}';

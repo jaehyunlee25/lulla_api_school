@@ -38,5 +38,6 @@ from
     left join institutions i on i.id = s.institutions_id
     left join users u on m.user_id = u.id 
 where 
-    s.id= '${schoolId}'
+    s.activated = true
+    and s.id= '${schoolId}'
     and sr.grade=1;

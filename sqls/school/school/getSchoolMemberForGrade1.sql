@@ -36,5 +36,6 @@ from
     left join users u on u.id = m.user_id
     left join kid k on m.kid_id = k.id
 where 
-    m.id = '${memberId}' 
+    s.activated = true
+    and m.id = '${memberId}' 
     and m.is_active is true;

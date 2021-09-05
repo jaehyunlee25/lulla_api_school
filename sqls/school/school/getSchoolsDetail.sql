@@ -16,4 +16,5 @@ from
     left join district_two d2 on d2.id = s.district_two_id
     left join institutions i on i.id = s.institutions_id
 where 
-    s.name like '%${search}%'
+    s.activated = true
+    and s.name like '%${search}%'
