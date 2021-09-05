@@ -3,5 +3,5 @@ update
 set
     ${strSets}
 where
-    s.activated = true
+    activated = true
     and id = '${schoolId}';
