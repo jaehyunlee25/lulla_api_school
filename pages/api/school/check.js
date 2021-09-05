@@ -1,4 +1,4 @@
-import { RESPOND, ERROR } from '../../../lib/apiCommon';
+import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
@@ -29,8 +29,10 @@ export default async function handler(req, res) {
   }
 }
 async function main(req, res) {
-  // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
-  console.log(req.body);
+  // #3.0. 사용자 토큰을 이용해 userId를 추출한다.
+  const qUserId = await getUserIdFromToken(req.headers.authorization);
+  if (qUserId.type === 'error') return qUserId.onError(res, '3.0');
+  // #3.1. 원등록 정보에 institution_id와 일치하는 원이 있는지 조회한다.
   const { institution_id: institutionId } = req.body.school;
   const qSBI = await QTS.getSBI.fQuery({ institutionId });
   if (qSBI.type === 'error')
