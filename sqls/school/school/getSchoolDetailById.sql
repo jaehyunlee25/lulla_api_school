@@ -30,12 +30,12 @@ select
     )
 from 
     schools s 
-    left join member m on m.school_id = s.id 
-    left join school_role sr on sr.id = m.school_role_id
+    left join members m on m.school_id = s.id 
+    left join school_roles sr on sr.id = m.school_role_id
     left join district_one d1 on d1.id = s.district_one_id
     left join district_two d2 on d2.id = s.district_two_id
     left join institutions i on i.id = s.institutions_id
     left join users u on m.user_id = u.id 
 where 
     s.id= '${schoolId}' 
-    and sr.grade = 1
+    and sr.grade = 1;

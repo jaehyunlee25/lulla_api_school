@@ -206,10 +206,11 @@ async function get(req, res) {
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
   const userId = qUserId.message;
+  console.log(userId);
   // #3.2 userId와 memberId가 같은 멤버 조회
   // #3.2.1 memberId 유효성 점검
-  const { memberId, search } = req.query;
-  if (memberId)
+  const { member_id: memberId, search } = req.query;
+  if (!memberId)
     return ERROR(res, {
       resultCode: 400,
       id: 'ERR.school.school.3.2.1',
@@ -237,7 +238,7 @@ async function get(req, res) {
     if (qSSD.type === 'error')
       return qSSD.onError(res, '3.3.2.1', 'searching school');
     return RESPOND(res, {
-      data: qSDBI.message.rows,
+      data: qSSD.message.rows,
       message: '해당하는 어린이집 리스트를 반환하였습니다.',
       resultCode: 200,
     });
@@ -250,7 +251,7 @@ async function get(req, res) {
     return ERROR(res, {
       resultCode: 204,
       id: 'ERR.school.school.3.3.2.2',
-      message: '해당하는 데이터가 존재하지 않습니다.',
+      message: '해당하는 어린이집 데이터가 존재하지 않습니다.',
     });
   return RESPOND(res, {
     data: qSDBI.message.rows[0],
