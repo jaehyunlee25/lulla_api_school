@@ -7,6 +7,8 @@ select
 from
     members m
     left join school_roles r on m.school_id = r.school_id
+    left join schools s on m.school_id = s.id
 where
-    m.id = '${memberId}'
+    s.activated = true
+    and m.id = '${memberId}'
     and m.user_id = '${userId}';

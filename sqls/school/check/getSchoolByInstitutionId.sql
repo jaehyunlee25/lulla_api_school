@@ -3,4 +3,5 @@ select
 from
     schools
 where
-    institutions_id = '${institutionId}';
+    activated = true
+    and institutions_id = '${institutionId}';
