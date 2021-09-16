@@ -56,7 +56,7 @@ async function post(req, res) {
     district_one_id: districtOneId,
     district_two_id: districtTwoId,
     admin_name: adminName,
-    institutions_id: institutionsId,
+    institutions_id: instId,
     userId,
     description,
     roleName,
@@ -100,6 +100,7 @@ async function post(req, res) {
       });
   }
   // #3.2.1. 권한이 있으면 원을 등록한다.
+  const institutionsId = instId === '' ? null : instId;
   const qSchool = await QTS.newSchool.fQuery({
     name,
     address,
