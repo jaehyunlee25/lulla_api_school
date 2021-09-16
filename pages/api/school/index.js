@@ -75,8 +75,8 @@ async function post(req, res) {
     });
   // #3.1.2.
   let institution;
-  if (institutionsId) {
-    const qIBI = await QTS.getIBI.fQuery({ id: institutionsId });
+  if (instId) {
+    const qIBI = await QTS.getIBI.fQuery({ id: instId });
     if (qIBI.type === 'error')
       return qIBI.onError(res, '3.1.2', 'getting institution');
     if (qIBI.message.rows.length === 0)
@@ -89,7 +89,7 @@ async function post(req, res) {
   }
   // #3.1.3.
   if (institution) {
-    const qSBII = await QTS.getSBII.fQuery({ institutionsId });
+    const qSBII = await QTS.getSBII.fQuery({ instId });
     if (qSBII.type === 'error')
       return qSBII.onError(res, '3.1.3', 'getting school');
     if (qSBII.message.rows.length > 0)
