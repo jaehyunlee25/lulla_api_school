@@ -49,7 +49,7 @@ async function post(req, res) {
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.0');
   // 원 생성
-  let { tel } = req.body;
+  let { tel } = req.body.school;
   const {
     address,
     name,
@@ -61,7 +61,7 @@ async function post(req, res) {
     description,
     roleName,
     roleDescription,
-  } = req.body;
+  } = req.body.school;
   // #3.1.1. 전화번호를 이용해 이미 등록된 원인지 파악한다.
   tel = tel.replace(/-/g, '');
   const qSBP = await QTS.getSBP.fQuery({ tel });
