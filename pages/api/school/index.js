@@ -53,10 +53,10 @@ async function post(req, res) {
   const {
     address,
     name,
-    districtOneId,
-    districtTwoId,
+    district_one_id: districtOneId,
+    district_two_id: districtTwoId,
     adminName,
-    institutionsId,
+    institutions_id: institutionsId,
     userId,
     description,
     roleName,
