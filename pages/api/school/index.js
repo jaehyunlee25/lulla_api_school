@@ -55,7 +55,7 @@ async function post(req, res) {
     name,
     district_one_id: districtOneId,
     district_two_id: districtTwoId,
-    adminName,
+    admin_name: adminName,
     institutions_id: institutionsId,
     userId,
     description,
