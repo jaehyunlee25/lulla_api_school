@@ -48,6 +48,7 @@ async function post(req, res) {
   // #3.0. 사용자 토큰을 이용해 유효성을 검증하고, 필요하면 userId를 추출한다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.0');
+  const userId = qUserId.message;
   // 원 생성
   let { tel } = req.body.school;
   const {
@@ -57,7 +58,6 @@ async function post(req, res) {
     district_two_id: districtTwoId,
     admin_name: adminName,
     institutions_id: instId,
-    userId,
     description,
     roleName,
     roleDescription,
