@@ -17,7 +17,7 @@ select
     m.class_id,
     m.school_role_id, 
     m.is_admin,
-    m.id != '${memberId}' as chat_active,
+    (m.id != '${memberId}' and (sr.grade < 5 or m.class_id = '${classId}')) as chat_active,
     CASE 
         WHEN sr.grade = 1 THEN concat(s.name) 
         WHEN sr.grade < 3 THEN concat(u.name,' ',sr.name) 
