@@ -126,8 +126,6 @@ async function main(req, res) {
   };
   const qtsName = obQuery[key];
 
-  console.log(key, qtsName);
-
   const qSMFG = await QTS[qtsName].fQuery({
     schoolId,
     classId,
