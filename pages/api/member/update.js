@@ -69,8 +69,8 @@ async function main(req, res) {
   const qSM = await QTS.setMember.fQuery({
     nickname,
     description,
-    imageId,
-    backgroundImageId,
+    imageId: imageId || null,
+    backgroundImageId: backgroundImageId || null,
     memberId,
   });
   if (qSM.type === 'error')

@@ -32,7 +32,7 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/member/image'); // 끝에 슬래시 붙이지 마시오.
+  setBaseURL('sqls/member/background-image'); // 끝에 슬래시 붙이지 마시오.
 
   const param = {};
   const busboy = new Busboy({ headers: req.headers });
