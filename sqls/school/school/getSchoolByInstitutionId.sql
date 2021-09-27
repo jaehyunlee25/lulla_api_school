@@ -4,4 +4,4 @@ from
     schools
 where
     activated = true
-    and id='${institutionsId}';
+    and id='${instId}';
