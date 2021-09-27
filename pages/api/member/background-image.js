@@ -163,7 +163,7 @@ async function main(req, res) {
     return qMemb.onError(res, '3.4.1', 'updating member');
 
   return RESPOND(res, {
-    message: '프로필 이미지 변경 성공',
+    message: '배경 이미지 변경 성공',
     resultCode: 200,
   });
 }
