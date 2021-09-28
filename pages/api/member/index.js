@@ -142,7 +142,7 @@ async function main(req, res) {
     });
 
   return RESPOND(res, {
-    data: qSMFG.message.rows,
+    data: qSMFG.message.rows[0],
     message: '해당하는 데이터를 성공적으로 반환하였습니다.',
     resultCode: 200,
   });
