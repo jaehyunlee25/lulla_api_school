@@ -6,6 +6,7 @@ const QTS = {
   getSBI: 'getSchoolById',
   getMIUI: 'getMemberByIdAndUserId',
   delSchool: 'delSchoolById',
+  setMember: 'setMember',
 };
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -77,6 +78,10 @@ async function main(req, res) {
   const qDelS = await QTS.delSchool.fQuery({ schoolId });
   if (qDelS.type === 'error')
     return qDelS.onError(res, '3.2.3.2', 'udpate school');
+
+  // #3.2.4 멤버프로필 변경
+  const qMem = await QTS.setMember.fQuery({ memberId });
+  if (qMem.type === 'error') return qMem.onError(res, '3.2.4', 'udpate school');
 
   return RESPOND(res, {
     message: '성공적으로 삭제하였습니다.',
