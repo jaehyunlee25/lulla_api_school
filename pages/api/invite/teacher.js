@@ -1,5 +1,10 @@
 /* eslint-disable no-template-curly-in-string */
-import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon'; // include String.prototype.fQuery
+import {
+  RESPOND,
+  ERROR,
+  getUserIdFromToken,
+  POST,
+} from '../../../lib/apiCommon'; // include String.prototype.fQuery
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
@@ -87,7 +92,23 @@ async function main(req, res) {
     return qGet.onError(res, '3.4.1', 'searching invitation');
   const inv = qGet.message.rows[0];
 
-  // #3.2.4.6 활성화한 사용자,  토큰,  학원인원을 리턴한다.
+  // #3.6. 문자 메시지를 전송한다.
+  const qMember = await POST(
+    'send',
+    '/sms',
+    {
+      'Content-Type': req.headers['Content-Type'],
+      authorization: req.headers.authorization,
+    },
+    {
+      message: `'${inv.school_name}'에서 초대장을 보냈습니다. [랄라]`,
+      phone,
+    },
+  );
+  if (qMember.type === 'error')
+    return qMember.onError(res, '3.2', 'fatal error while searching member');
+
+  // #3.7. 리턴
   return RESPOND(res, {
     invitation: inv,
     resultCode: 200,
