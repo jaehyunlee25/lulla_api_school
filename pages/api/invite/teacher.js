@@ -81,6 +81,7 @@ async function main(req, res) {
     schoolId,
     phone,
     roleName,
+    memberId,
   });
   if (qNew.type === 'error')
     return qNew.onError(res, '3.4.1', 'creating invitation');

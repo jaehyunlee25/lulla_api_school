@@ -1,17 +1,11 @@
 /* eslint-disable no-template-curly-in-string */
-import {
-  RESPOND,
-  ERROR,
-  getUserIdFromToken,
-  POST,
-} from '../../../lib/apiCommon'; // include String.prototype.fQuery
+import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon'; // include String.prototype.fQuery
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
+  getTeachers: 'getTeachers',
   getMIUI: 'getMemberByIdAndUserId',
-  getInvitation: 'getInvitation',
-  newInvitation: 'newInvitation',
 };
 export default async function handler(req, res) {
   // 회원가입
@@ -28,28 +22,26 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
   // #3. 데이터 처리
   // #3.1. 작업
-  setBaseURL('sqls/invite/carer'); // 끝에 슬래시 붙이지 마시오.
+  setBaseURL('sqls/invite/getTeachers'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.2.
   try {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.invite.carer.3.2.2',
+      id: 'ERR.invite.getTeachers.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
     });
   }
 }
 async function main(req, res) {
-  const { invitation, member_id: memberId } = req.body;
   const {
-    phone,
-    role_name: roleName,
+    member_id: memberId,
     class_id: classId,
-    kid_name: kidName,
-    type,
-  } = invitation;
+    confirmed,
+    role_name: roleName,
+  } = req.body;
 
   // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
@@ -67,58 +59,33 @@ async function main(req, res) {
   if (qMIUI.message.rows.length === 0)
     return ERROR(res, {
       resultCode: 400,
-      id: 'ERR.invite.carer.3.2.3',
+      id: 'ERR.invite.getTeachers.3.2.3',
       message: 'no such member',
     });
   const { school_id: schoolId, grade } = qMIUI.message.rows[0];
 
-  // #3.3. 보호자 초대는 1. 원장, 2. 관리자만이 가능하다.
+  // #3.3. 선생님 초대장 검색은 1. 원장, 2. 관리자만이 가능하다.
   if (grade > 2)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.invite.carer.3.3.1',
-      message: '보호자 초대장을 생성할 권한이 없습니다.',
+      id: 'ERR.invite.getTeachers.3.3.1',
+      message: '선생님 초대를 검색할 권한이 없습니다.',
     });
 
   // #3.4. 초대장을 생성한다.
-  const qNew = await QTS.newInvitation.fQuery({
-    type,
-    classId,
+  const qGet = await QTS.getTeachers.fQuery({
     schoolId,
-    phone,
+    classId,
+    confirmed,
     roleName,
-    kidName,
-    memberId,
   });
-  if (qNew.type === 'error')
-    return qNew.onError(res, '3.4.1', 'creating invitation');
-  const invId = qNew.message.rows[0].id;
-
-  // #3.5. 초대장 정보를 가져온다.
-  const qGet = await QTS.getInvitation.fQuery({ invId });
   if (qGet.type === 'error')
     return qGet.onError(res, '3.4.1', 'searching invitation');
-  const inv = qGet.message.rows[0];
-
-  // #3.6. 문자 메시지를 전송한다.
-  const qMember = await POST(
-    'send',
-    '/sms',
-    {
-      'Content-Type': req.headers['Content-Type'],
-      authorization: req.headers.authorization,
-    },
-    {
-      message: `'${inv.school_name}'에서 초대장을 보냈습니다. [랄라]`,
-      phone,
-    },
-  );
-  if (qMember.type === 'error')
-    return qMember.onError(res, '3.2', 'fatal error while searching member');
+  const teachers = qGet.message.rows;
 
   // #3.7. 리턴
   return RESPOND(res, {
-    invitation: inv,
+    teachers,
     resultCode: 200,
     message: '초대장을 성공적으로 반환하였습니다.',
   });

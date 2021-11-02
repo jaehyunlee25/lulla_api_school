@@ -88,6 +88,7 @@ async function main(req, res) {
     phone,
     roleName,
     kidId,
+    memberId,
   });
   if (qNew.type === 'error')
     return qNew.onError(res, '3.4.1', 'creating invitation');

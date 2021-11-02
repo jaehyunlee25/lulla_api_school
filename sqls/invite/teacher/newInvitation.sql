@@ -7,7 +7,8 @@ insert into
         class_id,
         school_id,
         phone,
-        role_name
+        role_name,
+        inviter_id
     )
 values(
     uuid_generate_v1(),
@@ -17,5 +18,6 @@ values(
     '${classId}',
     '${schoolId}',
     '${phone}',
-    '${roleName}'
+    '${roleName}',
+    '${memberId}'
 ) returning id;
