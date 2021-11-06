@@ -1,6 +1,7 @@
 insert into 
     members(
         id,
+        nickname,
         created_at,
         updated_at,
         user_id,
@@ -13,6 +14,7 @@ insert into
     )
 values(
     uuid_generate_v1(),
+    '보호자',
     now(),
     now(),
     '${userId}',
