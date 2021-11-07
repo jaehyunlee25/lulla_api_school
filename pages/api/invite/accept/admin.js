@@ -9,6 +9,8 @@ const QTS = {
   newMember: 'newMember',
   getSMFG1: 'getSchoolMemberForGrade1',
   newSchoolRoles: 'newSchoolRoles',
+  getPBG: 'getPermissionsByGrade',
+  newMP: 'newMemberPermissions',
 };
 let EXEC_STEP = 0;
 
@@ -94,13 +96,30 @@ async function main(req, res) {
   if (qConfirmed.type === 'error')
     return qConfirmed.onError(res, '3.5.1', 'updating invitation');
 
-  EXEC_STEP = '3.6'; // #3.6. 리턴할 정보를 가져온다.
+  EXEC_STEP = '3.6'; // #3.6 관리자의 권한 id를 불러온다.
+  // tables related :: permissions, permission_members, school_roles, members
+  const qPBG = await QTS.getPBG.fQuery({ grade: 2 });
+  if (qPBG.type === 'error')
+    return qPBG.onError(res, '3.6.1', 'searching permissions');
+  const permissions = qPBG.message.rows[0].ids.split(',');
+
+  EXEC_STEP = '3.7'; // #3.7 member_permissions 에 추가한다.
+  const qMP = await QTS.newMP.fQuery({
+    memberId,
+    schoolId,
+    grade: 2,
+    permissions: ['{', permissions.join(','), '}'].join(''),
+  });
+  if (qMP.type === 'error')
+    return qMP.onError(res, '3.7.1', 'insert member permissions');
+
+  EXEC_STEP = '3.8'; // #3.6. 리턴할 정보를 가져온다.
   const qSMFG1 = await QTS.getSMFG1.fQuery({ memberId });
   if (qSMFG1.type === 'error')
     return qSMFG1.onError(res, '3.6.1', 'searching school member');
   const data = qSMFG1.message.rows;
 
-  EXEC_STEP = '3.7'; // #3.7. 리턴
+  EXEC_STEP = '3.9'; // #3.7. 리턴
   return RESPOND(res, {
     data,
     resultCode: 200,
