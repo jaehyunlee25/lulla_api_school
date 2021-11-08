@@ -2,7 +2,7 @@ import {
   RESPOND,
   ERROR,
   getUserIdFromToken,
-  // POST,
+  POST,
 } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
@@ -19,6 +19,8 @@ const QTS = {
   getAnnouncement: 'getAnnouncement',
 };
 let EXEC_STEP = 0;
+// eslint-disable-next-line no-unused-vars
+const baseUrl = 'sqls/announce/update';
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -149,7 +151,7 @@ async function main(req, res) {
         return qFile.onError(res, '3.8.1', 'creating attached file list');
     }
   }
-  /*
+
   EXEC_STEP = '3.9'; // #3.9. 채팅을 publish한다.
   const members = [toMemberId];
   const qMember = await POST(
@@ -167,7 +169,7 @@ async function main(req, res) {
       '3.9.1',
       'fatal error while publishing message',
     );
-  */
+
   EXEC_STEP = '3.10'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery({ annId });
   if (qData.type === 'error')
