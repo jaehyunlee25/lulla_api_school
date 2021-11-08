@@ -154,7 +154,7 @@ async function main(req, res) {
   const members = [toMemberId];
   const qMember = await POST(
     'send',
-    '/chat/announce',
+    '/chat',
     {
       'Content-Type': 'application/json',
       authorization: req.headers.authorization,
