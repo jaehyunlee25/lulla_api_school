@@ -19,8 +19,7 @@ const QTS = {
   getAnnouncement: 'getAnnouncement',
 };
 let EXEC_STEP = 0;
-// eslint-disable-next-line no-unused-vars
-const baseUrl = 'sqls/announce/update';
+
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -169,6 +168,8 @@ async function main(req, res) {
       '3.9.1',
       'fatal error while publishing message',
     );
+  // POST 호출 시에 baseUrl이 바뀔 수 있으니, 새로 셋팅해 준다.
+  setBaseURL('sqls/announce/update');
 
   EXEC_STEP = '3.10'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery({ annId });
