@@ -56,6 +56,7 @@ async function main(req, res) {
     to_member_id: toMemberId, // uuid
     file_list: fileList, // uuid[]
     deleted_list: deletedList, // uuid[]
+    is_published: isPublished, // boolean
   } = req.body;
 
   EXEC_STEP = '3.2'; // #3.2. member 검색
@@ -156,23 +157,25 @@ async function main(req, res) {
     }
   }
 
-  EXEC_STEP = '3.9'; // #3.9. 채팅을 publish한다.
-  const members = [toMemberId];
-  const qMember = await POST(
-    'send',
-    '/chat',
-    {
-      'Content-Type': 'application/json',
-      authorization: req.headers.authorization,
-    },
-    { member_id: memberId, members, message: annId },
-  );
-  if (qMember.type === 'error')
-    return qMember.onError(
-      res,
-      '3.9.1',
-      'fatal error while publishing message',
+  if (isPublished) {
+    EXEC_STEP = '3.9'; // #3.9. 채팅을 publish한다.
+    const members = [toMemberId];
+    const qMember = await POST(
+      'send',
+      '/chat',
+      {
+        'Content-Type': 'application/json',
+        authorization: req.headers.authorization,
+      },
+      { member_id: memberId, members, message: annId },
     );
+    if (qMember.type === 'error')
+      return qMember.onError(
+        res,
+        '3.9.1',
+        'fatal error while publishing message',
+      );
+  }
 
   EXEC_STEP = '3.10'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery(baseUrl, { annId });

@@ -140,23 +140,25 @@ async function main(req, res) {
       return qFile.onError(res, '3.6.1', 'creating attached file list');
   }
 
-  EXEC_STEP = '3.7'; // #3.7. 채팅을 publish한다.
-  const members = [toMemberId];
-  const qMember = await POST(
-    'send',
-    '/chat/announce',
-    {
-      'Content-Type': 'application/json',
-      authorization: req.headers.authorization,
-    },
-    { member_id: memberId, members, message: annId },
-  );
-  if (qMember.type === 'error')
-    return qMember.onError(
-      res,
-      '3.7.1',
-      'fatal error while publishing message',
+  if (isPublished) {
+    EXEC_STEP = '3.7'; // #3.7. 채팅을 publish한다.
+    const members = [toMemberId];
+    const qMember = await POST(
+      'send',
+      '/chat/announce',
+      {
+        'Content-Type': 'application/json',
+        authorization: req.headers.authorization,
+      },
+      { member_id: memberId, members, message: annId },
     );
+    if (qMember.type === 'error')
+      return qMember.onError(
+        res,
+        '3.7.1',
+        'fatal error while publishing message',
+      );
+  }
 
   EXEC_STEP = '3.8'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery(baseUrl, { annId });
