@@ -1,5 +1,5 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -16,6 +16,7 @@ const QTS = {
 
   getMIUI: 'getMemberByIdAndUserId',
 };
+const baseUrl = 'sqls/member/member'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -27,7 +28,6 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   // if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/member/member'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -51,7 +51,7 @@ async function main(req, res) {
   const { member_id: memberId, id: searchMemberId, type } = req.query;
 
   if (!memberId) {
-    const qSMFG = await QTS.getASM.fQuery({ userId });
+    const qSMFG = await QTS.getASM.fQuery(baseUrl, { userId });
     if (qSMFG.type === 'error')
       return qSMFG.onError(res, '3.4.1', 'searching member');
 
@@ -63,7 +63,7 @@ async function main(req, res) {
   }
 
   // #3.2.2 member 검색
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.2.2', 'searching member');
   if (qMIUI.message.rows.length === 0)
@@ -88,7 +88,7 @@ async function main(req, res) {
       5: 'getSMFG5',
     };
     const qtsName = obQuery[grade];
-    const qSMFG = await QTS[qtsName].fQuery({
+    const qSMFG = await QTS[qtsName].fQuery(baseUrl, {
       memberId: searchMemberId,
       classId,
     });
@@ -126,7 +126,7 @@ async function main(req, res) {
   };
   const qtsName = obQuery[key];
 
-  const qSMFG = await QTS[qtsName].fQuery({
+  const qSMFG = await QTS[qtsName].fQuery(baseUrl, {
     schoolId,
     classId,
     userId,

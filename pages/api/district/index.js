@@ -1,11 +1,12 @@
 import { RESPOND, ERROR } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
   getDO: 'getDistrictOne',
   getDT: 'getDistrictTwo',
 };
+const baseUrl = 'sqls/district/district'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -16,8 +17,6 @@ export default async function handler(req, res) {
   });
   // #2. preflight 처리
   // if (req.method === 'OPTIONS') return RESPOND(res, {});
-
-  setBaseURL('sqls/district/district'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -33,7 +32,7 @@ async function main(req, res) {
   const districtOneId = req.query.id;
   // #3.2. 대지역 정보 id 가 없을 시, 대지역 정보 전부 출력
   if (!districtOneId) {
-    const qDO = await QTS.getDO.fQuery({});
+    const qDO = await QTS.getDO.fQuery(baseUrl, {});
     if (qDO.type === 'error')
       return qDO.onError(res, '3.2.1', 'searching districtOne');
 
@@ -44,7 +43,7 @@ async function main(req, res) {
     });
   }
   // #3.3. 대지역 정보 id 가 있을 시, 중지역 정보 전부 출력
-  const qDT = await QTS.getDT.fQuery({ districtOneId });
+  const qDT = await QTS.getDT.fQuery(baseUrl, { districtOneId });
   if (qDT.type === 'error')
     return qDT.onError(res, '3.3.1', 'searching districtTwo');
 

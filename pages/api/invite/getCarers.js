@@ -1,12 +1,13 @@
 /* eslint-disable no-template-curly-in-string */
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon'; // include String.prototype.fQuery
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
   getCarers: 'getCarers',
   getMIUI: 'getMemberByIdAndUserId',
 };
+const baseUrl = 'sqls/invite/getCarers'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // 회원가입
   // 기능: : 탈퇴회원 활성화,  혹은 신규멤버 등록 및 보안토큰 발행,  관련멤버명단 추출
@@ -22,7 +23,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
   // #3. 데이터 처리
   // #3.1. 작업
-  setBaseURL('sqls/invite/getCarers'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.2.
   try {
@@ -52,7 +52,7 @@ async function main(req, res) {
 
   // #3.2. member 검색
   // #3.2.1.
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.2.2', 'searching member');
   // #3.2.2.
@@ -73,7 +73,7 @@ async function main(req, res) {
     });
 
   // #3.4. 초대장을 생성한다.
-  const qGet = await QTS.getCarers.fQuery({
+  const qGet = await QTS.getCarers.fQuery(baseUrl, {
     schoolId,
     classId,
     confirmed,

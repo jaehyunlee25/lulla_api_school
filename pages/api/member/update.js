@@ -1,5 +1,5 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -7,6 +7,7 @@ const QTS = {
   getMember: 'getMember',
   setMember: 'setMember',
 };
+const baseUrl = 'sqls/member/update'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -18,7 +19,6 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/member/update'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -48,7 +48,7 @@ async function main(req, res) {
   } = req.body;
 
   // #3.2 member 검색
-  const qMember = await QTS.getMember.fQuery({ memberId });
+  const qMember = await QTS.getMember.fQuery(baseUrl, { memberId });
   if (qMember.type === 'error')
     return qMember.onError(res, '3.2.1', 'searching member');
   if (qMember.message.rows.length === 0)
@@ -66,7 +66,7 @@ async function main(req, res) {
     });
 
   // #3.3 member 정보 수정
-  const qSM = await QTS.setMember.fQuery({
+  const qSM = await QTS.setMember.fQuery(baseUrl, {
     nickname,
     description,
     imageId: imageId || null,
@@ -77,7 +77,7 @@ async function main(req, res) {
     return qSM.onError(res, '3.3.1', 'searching member');
 
   // #3.4 수정된 member 정보 추출
-  const getSMBI = await QTS.getSMBI.fQuery({ memberId });
+  const getSMBI = await QTS.getSMBI.fQuery(baseUrl, { memberId });
   if (getSMBI.type === 'error')
     return getSMBI.onError(res, '3.3.1', 'searching member');
   if (getSMBI.message.rows.length === 0)

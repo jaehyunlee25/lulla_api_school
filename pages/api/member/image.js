@@ -9,7 +9,7 @@ import {
   DELETE,
   SIZE,
 } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 import S3UPLOAD from '../../../lib/S3AWS';
 
 const QTS = {
@@ -19,6 +19,7 @@ const QTS = {
   setMember: 'setMember',
 };
 const ADDR = './public/tmp/';
+const baseUrl = 'sqls/member/image'; // 끝에 슬래시 붙이지 마시오.
 
 export const config = { api: { bodyParser: false } };
 export default async function handler(req, res) {
@@ -31,8 +32,6 @@ export default async function handler(req, res) {
   });
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
-
-  setBaseURL('sqls/member/image'); // 끝에 슬래시 붙이지 마시오.
 
   const param = {};
   const busboy = new Busboy({ headers: req.headers });
@@ -95,7 +94,7 @@ async function main(req, res) {
   const { name: fileName } = file;
 
   // #3.1.2. member 검색
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.1.2.1', 'searching member');
   if (qMIUI.message.rows.length === 0)
@@ -143,7 +142,7 @@ async function main(req, res) {
   DELETE(ADDR, thumbFileName);
 
   // #3.3. file 테이블에 저장
-  const qFile = await QTS.newFile.fQuery({
+  const qFile = await QTS.newFile.fQuery(baseUrl, {
     fileName: file.name,
     type: file.mimetype.split('/')[0],
     address: s3Data.Location,
@@ -158,7 +157,7 @@ async function main(req, res) {
   const imageId = qFile.message.rows[0].id;
 
   // #3.4. 프로필에 이미지 id 저장
-  const qMemb = await QTS.setMember.fQuery({ imageId, memberId });
+  const qMemb = await QTS.setMember.fQuery(baseUrl, { imageId, memberId });
   if (qMemb.type === 'error')
     return qMemb.onError(res, '3.4.1', 'updating member');
 

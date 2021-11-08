@@ -1,5 +1,5 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -8,6 +8,7 @@ const QTS = {
   getSDBI: 'getSchoolDetailById',
   getMIUI: 'getMemberByIdAndUserId',
 };
+const baseUrl = 'sqls/school/update'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -20,7 +21,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
   // #3. 작업
-  setBaseURL('sqls/school/update'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -48,7 +48,7 @@ async function main(req, res) {
       message: 'member_id의 형식이 올바르지 않습니다.',
     });
   // #3.1.2 member 검색
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.1.2', 'searching member');
   if (qMIUI.message.rows.length === 0)
@@ -66,7 +66,7 @@ async function main(req, res) {
       message: '해당하는 원에 접근권한이 없습니다.',
     });
   // #3.2.2 해당 원이 있는지 조회
-  const qSBI = await QTS.getSBI.fQuery({ schoolId });
+  const qSBI = await QTS.getSBI.fQuery(baseUrl, { schoolId });
   if (qSBI.type === 'error')
     return qSBI.onError(res, '3.2.2.1', 'searching school');
   if (qSBI.message.rows.length === 0)
@@ -98,11 +98,11 @@ async function main(req, res) {
   });
   // #3.2.3.2. 원의 정보를 수정한다.
   const strSets = sets.join(',\r\n    ');
-  const qSetS = await QTS.setSBI.fQuery({ strSets, schoolId });
+  const qSetS = await QTS.setSBI.fQuery(baseUrl, { strSets, schoolId });
   if (qSetS.type === 'error')
     return qSetS.onError(res, '3.2.3.2', 'udpate school');
   // #3.2.3.3. 수정한 원의 정보를 수집한다.
-  const qSDBI = await QTS.getSDBI.fQuery({ schoolId });
+  const qSDBI = await QTS.getSDBI.fQuery(baseUrl, { schoolId });
   if (qSDBI.type === 'error')
     return qSDBI.onError(res, '3.2.3.3.1', 'searching school');
   if (qSDBI.message.rows.length === 0)

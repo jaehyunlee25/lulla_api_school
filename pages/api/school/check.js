@@ -1,10 +1,11 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
   getSBI: 'getSchoolByInstitutionId',
 };
+const baseUrl = 'sqls/school/check'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -17,7 +18,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
   // #3. 작업
-  setBaseURL('sqls/school/check'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -35,7 +35,7 @@ async function main(req, res) {
 
   // #3.1. 원등록 정보에 institution_id와 일치하는 원이 있는지 조회한다.
   const { institutions_id: institutionId } = req.body.school;
-  const qSBI = await QTS.getSBI.fQuery({ institutionId });
+  const qSBI = await QTS.getSBI.fQuery(baseUrl, { institutionId });
   if (qSBI.type === 'error')
     return qSBI.onError(res, '3.1.1', 'searching school');
   if (qSBI.message.rows.length > 0)

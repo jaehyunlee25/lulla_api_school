@@ -4,7 +4,7 @@ import {
   getUserIdFromToken,
   POST,
 } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -15,6 +15,7 @@ const QTS = {
   newFile: 'newFile',
   getAnnouncement: 'getAnnouncement',
 };
+const baseUrl = 'sqls/announce/announce'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -27,7 +28,6 @@ export default async function handler(req, res) {
   // #2. preflight 처리
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
-  setBaseURL('sqls/announce/announce'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -63,7 +63,7 @@ async function main(req, res) {
 
   EXEC_STEP = '3.2'; // #3.2. member 검색
   // #3.2.1.
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.2.2', 'searching member');
   // #3.2.2.
@@ -80,7 +80,11 @@ async function main(req, res) {
   // 보호자 grade 5도 이 권한을 가지고 있다.
   const type = 4; // announce
   const action = 1; // create
-  const qCheck = await QTS.getPermission.fQuery({ memberId, type, action });
+  const qCheck = await QTS.getPermission.fQuery(baseUrl, {
+    memberId,
+    type,
+    action,
+  });
   if (qCheck.type === 'error')
     return qCheck.onError(res, '3.3.1', 'searching permission');
 
@@ -92,7 +96,7 @@ async function main(req, res) {
     });
 
   EXEC_STEP = '3.4'; // #3.4. 둘이 속해 있는 채팅방의 id를 찾는다.
-  const qChat = await QTS.getChatRoom.fQuery({ memberId, toMemberId });
+  const qChat = await QTS.getChatRoom.fQuery(baseUrl, { memberId, toMemberId });
   if (qChat.type === 'error')
     return qChat.onError(res, '3.5.1', 'creating announcement');
   if (qChat.message.rows.length === 0)
@@ -104,7 +108,7 @@ async function main(req, res) {
   const chatId = qChat.message.rows[0].id;
 
   EXEC_STEP = '3.5'; // #3.5. 알림장을 생성한다.
-  const qNew = await QTS.newAnnouncement.fQuery({
+  const qNew = await QTS.newAnnouncement.fQuery(baseUrl, {
     date,
     condition,
     meal,
@@ -131,7 +135,7 @@ async function main(req, res) {
           `(uuid_generate_v1(), now(), now(), '${annId}', '${fileId}')`,
       )
       .join(',\r\n\t');
-    const qFile = await QTS.newFile.fQuery({ queryFileList });
+    const qFile = await QTS.newFile.fQuery(baseUrl, { queryFileList });
     if (qFile.type === 'error')
       return qFile.onError(res, '3.6.1', 'creating attached file list');
   }
@@ -155,7 +159,7 @@ async function main(req, res) {
     );
 
   EXEC_STEP = '3.8'; // #3.8. 리턴값을 생성한다.
-  const qData = await QTS.getAnnouncement.fQuery({ annId });
+  const qData = await QTS.getAnnouncement.fQuery(baseUrl, { annId });
   if (qData.type === 'error')
     return qData.onError(res, '3.8.1', 'searching announcement');
   const data = qData.message.rows;

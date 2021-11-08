@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../../lib/apiCommon'; // include String.prototype.fQuery
-import setBaseURL from '../../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -12,6 +12,7 @@ const QTS = {
   getPBG: 'getPermissionsByGrade',
   newMP: 'newMemberPermissions',
 };
+const baseUrl = 'sqls/invite/accept/teacher'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // 회원가입
   // 기능: : 탈퇴회원 활성화,  혹은 신규멤버 등록 및 보안토큰 발행,  관련멤버명단 추출
@@ -27,7 +28,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
   // #3. 데이터 처리
   // #3.1. 작업
-  setBaseURL('sqls/invite/accept/teacher'); // 끝에 슬래시 붙이지 마시오.
 
   // #3.2.
   try {
@@ -51,7 +51,7 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // #3.2. invitiation 정보 가져오기
-  const qInv = await QTS.getInvitation.fQuery({ invitationId });
+  const qInv = await QTS.getInvitation.fQuery(baseUrl, { invitationId });
   if (qInv.type === 'error')
     return qInv.onError(res, '3.2.1', 'searching invitation');
 
@@ -74,13 +74,13 @@ async function main(req, res) {
   const roleName = inv.role_name;
 
   // #3.3. 역할 등록
-  const qSR = await QTS.newSchoolRoles.fQuery({ schoolId, roleName });
+  const qSR = await QTS.newSchoolRoles.fQuery(baseUrl, { schoolId, roleName });
   if (qSR.type === 'error')
     return qSR.onError(res, '3.3.1', 'creating school roles');
   const schoolRoleId = qSR.message.rows[0].id;
 
   // #3.4. 멤버 등록
-  const qMember = await QTS.newMember.fQuery({
+  const qMember = await QTS.newMember.fQuery(baseUrl, {
     userId,
     classId,
     schoolId,
@@ -91,12 +91,12 @@ async function main(req, res) {
   const memberId = qMember.message.rows[0].id;
 
   // #3.5. invitation table의 confirmed를 true로
-  const qConfirmed = await QTS.setConfirmed.fQuery({ invitationId });
+  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, { invitationId });
   if (qConfirmed.type === 'error')
     return qConfirmed.onError(res, '3.5.1', 'updating invitation');
 
   // #3.7 member_permissions 에 추가한다.
-  const qMP = await QTS.newMP.fQuery({
+  const qMP = await QTS.newMP.fQuery(baseUrl, {
     memberId,
     schoolId,
     grade: 3,
@@ -105,7 +105,7 @@ async function main(req, res) {
     return qMP.onError(res, '3.7.1', 'insert member permissions');
 
   // #3.8. 리턴할 정보를 가져온다.
-  const qSMFG3 = await QTS.getSMFG3.fQuery({ memberId, classId });
+  const qSMFG3 = await QTS.getSMFG3.fQuery(baseUrl, { memberId, classId });
   if (qSMFG3.type === 'error')
     return qSMFG3.onError(res, '3.8.1', 'searching school member');
   const data = qSMFG3.message.rows;

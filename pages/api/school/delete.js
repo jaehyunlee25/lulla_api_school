@@ -1,5 +1,5 @@
 import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon';
-import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
@@ -8,6 +8,7 @@ const QTS = {
   delSchool: 'delSchoolById',
   setMember: 'setMember',
 };
+const baseUrl = 'sqls/school/delete'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -20,7 +21,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return RESPOND(res, {});
 
   // #3. 작업
-  setBaseURL('sqls/school/delete'); // 끝에 슬래시 붙이지 마시오.
   try {
     return await main(req, res);
   } catch (e) {
@@ -47,7 +47,7 @@ async function main(req, res) {
       message: 'member_id의 형식이 올바르지 않습니다.',
     });
   // #3.1.2 member 검색
-  const qMIUI = await QTS.getMIUI.fQuery({ userId, memberId });
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.1.2', 'searching member');
   if (qMIUI.message.rows.length === 0)
@@ -65,7 +65,7 @@ async function main(req, res) {
       message: '해당하는 원에 접근권한이 없습니다.',
     });
   // #3.2.2 해당 원이 있는지 조회
-  const qSBI = await QTS.getSBI.fQuery({ schoolId });
+  const qSBI = await QTS.getSBI.fQuery(baseUrl, { schoolId });
   if (qSBI.type === 'error')
     return qSBI.onError(res, '3.2.2.1', 'searching school');
   if (qSBI.message.rows.length === 0)
@@ -75,12 +75,12 @@ async function main(req, res) {
       message: '해당하는 원 정보가 존재하지 않습니다.',
     });
   // #3.2.3 해당 원의 정보를 삭제
-  const qDelS = await QTS.delSchool.fQuery({ schoolId });
+  const qDelS = await QTS.delSchool.fQuery(baseUrl, { schoolId });
   if (qDelS.type === 'error')
     return qDelS.onError(res, '3.2.3.2', 'udpate school');
 
   // #3.2.4 멤버프로필 변경
-  const qMem = await QTS.setMember.fQuery({ memberId });
+  const qMem = await QTS.setMember.fQuery(baseUrl, { memberId });
   if (qMem.type === 'error') return qMem.onError(res, '3.2.4', 'udpate school');
 
   return RESPOND(res, {
