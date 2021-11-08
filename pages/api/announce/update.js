@@ -2,7 +2,7 @@ import {
   RESPOND,
   ERROR,
   getUserIdFromToken,
-  POST,
+  // POST,
 } from '../../../lib/apiCommon';
 import setBaseURL from '../../../lib/pgConn'; // include String.prototype.fQuery
 
@@ -52,7 +52,7 @@ async function main(req, res) {
     id: annId, // announcement id
     member_id: memberId, // uuid
     to_member_id: toMemberId, // uuid
-    file_list: fileList, // uuid[]
+    // file_list: fileList, // uuid[]
     deleted_list: deletedList, // uuid[]
   } = req.body;
 
@@ -127,7 +127,7 @@ async function main(req, res) {
     if (qDelFile.type === 'error')
       return qDelFile.onError(res, '3.6.1', 'deleting announce file');
   }
-
+  /*
   if (fileList && fileList.length > 0) {
     EXEC_STEP = '3.7'; // #3.7. 새로 추가된 파일을 추출한다.
     const qFiles = await QTS.getFiles.fQuery({ annId });
@@ -167,7 +167,7 @@ async function main(req, res) {
       '3.9.1',
       'fatal error while publishing message',
     );
-
+  */
   EXEC_STEP = '3.10'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery({ annId });
   if (qData.type === 'error')
