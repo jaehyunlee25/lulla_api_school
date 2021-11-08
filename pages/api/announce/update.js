@@ -168,10 +168,10 @@ async function main(req, res) {
       'fatal error while publishing message',
     );
 
-  EXEC_STEP = '3.8'; // #3.8. 리턴값을 생성한다.
+  EXEC_STEP = '3.10'; // #3.8. 리턴값을 생성한다.
   const qData = await QTS.getAnnouncement.fQuery({ annId });
   if (qData.type === 'error')
-    return qData.onError(res, '3.8.1', 'searching announcement');
+    return qData.onError(res, '3.10.1', 'searching announcement');
   const data = qData.message.rows;
 
   return RESPOND(res, {
