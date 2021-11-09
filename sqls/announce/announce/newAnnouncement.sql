@@ -13,7 +13,7 @@ insert into
         is_reserved,
         content,
         to_member_id,
-        chat_id,
+        -- chat_id,
         is_record,
         sleep
     )
@@ -31,7 +31,7 @@ values(
     ${isReserved},
     '${content}',
     '${toMemberId}',
-    '${chatId}',
+    -- '${chatId}',
     ${isRecord},
     ${sleep}
 ) returning id;

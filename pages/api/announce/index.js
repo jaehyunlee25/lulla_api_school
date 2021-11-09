@@ -14,11 +14,6 @@ const QTS = {
   getChatRoom: 'getChatRoom',
   newFile: 'newFile',
   getAnnouncement: 'getAnnouncement',
-  // GET only
-  getATT: 'getAnnounceTeacherTemp',
-  getAT: 'getAnnounceTeacher',
-  getACT: 'getAnnounceCarerTemp',
-  getAC: 'getAnnounceCarer',
 };
 const baseUrl = 'sqls/announce/announce'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
@@ -152,7 +147,7 @@ async function main(req, res) {
     const members = [toMemberId];
     const qMember = await POST(
       'send',
-      '/chat/announce',
+      '/chat/setAnnounce',
       {
         'Content-Type': 'application/json',
         authorization: req.headers.authorization,

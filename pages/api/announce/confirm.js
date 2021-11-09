@@ -104,7 +104,7 @@ async function main(req, res) {
     return qChat.onError(res, '1.7', 'fatal error while publishing message');
 
   EXEC_STEP = '1.8'; // confirm한 알림장 리턴
-  const qData = await QTS.getAnnouncement.fQuery(baseUrl, { annId });
+  const qData = await QTS.getAnnounce.fQuery(baseUrl, { annId });
   if (qData.type === 'error')
     return qData.onError(res, '3.10.1', 'searching announcement');
   const data = qData.message.rows;
