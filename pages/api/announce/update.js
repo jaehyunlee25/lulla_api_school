@@ -167,7 +167,7 @@ async function main(req, res) {
         'Content-Type': 'application/json',
         authorization: req.headers.authorization,
       },
-      { member_id: memberId, members, message: annId },
+      { member_id: memberId, members, message: '알림장을 수정하였습니다.' },
     );
     if (qMember.type === 'error')
       return qMember.onError(

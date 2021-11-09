@@ -101,6 +101,7 @@ async function main(req, res) {
       message: '알림장을 발송할 권한이 없습니다.',
     });
 
+  /*
   EXEC_STEP = '3.4'; // #3.4. 둘이 속해 있는 채팅방의 id를 찾는다.
   const qChat = await QTS.getChatRoom.fQuery(baseUrl, { memberId, toMemberId });
   if (qChat.type === 'error')
@@ -112,6 +113,7 @@ async function main(req, res) {
       message: '알림장을 발행할 채팅방이 존재하지 않습니다.',
     });
   const chatId = qChat.message.rows[0].id;
+  */
 
   EXEC_STEP = '3.5'; // #3.5. 알림장을 생성한다.
   const qNew = await QTS.newAnnouncement.fQuery(baseUrl, {
@@ -125,7 +127,6 @@ async function main(req, res) {
     isReserved,
     content,
     toMemberId,
-    chatId,
     isRecord,
     sleep,
   });
