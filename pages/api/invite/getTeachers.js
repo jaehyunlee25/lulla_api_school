@@ -72,7 +72,7 @@ async function main(req, res) {
       message: '선생님 초대를 검색할 권한이 없습니다.',
     });
 
-  // #3.4. 초대장을 생성한다.
+  // #3.4. 초대장 정보를 가져온다.
   const qGet = await QTS.getTeachers.fQuery(baseUrl, {
     schoolId,
     classId,
