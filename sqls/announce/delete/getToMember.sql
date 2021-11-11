@@ -1,5 +1,5 @@
 select 
-    distinct(to_member_id) toMemberId
+    distinct(to_member_id) to_member_id
 from 
     announcement 
 where 

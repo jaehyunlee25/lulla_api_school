@@ -1,6 +1,6 @@
 select
     id
 from
-    chat_publish
+    announcement
 where
-    message in ${avAnnIds};
+    id in ${annIds};

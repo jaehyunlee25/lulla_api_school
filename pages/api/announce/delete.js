@@ -15,7 +15,7 @@ const QTS = {
   delChat: 'delChat',
   getToMember: 'getToMember',
 };
-const baseUrl = 'sqls/announce/confirm'; // 끝에 슬래시 붙이지 마시오.
+const baseUrl = 'sqls/announce/delete'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -113,14 +113,17 @@ async function main(req, res) {
       message: '1개 이상의 방의 알림장을 동시에 삭제할 수 없습니다.',
     });
 
-  const { toMemberId } = qToMem.message.rows[0];
+  const { to_member_id: toMemberId } = qToMem.message.rows[0];
+  console.log(toMemberId);
 
   EXEC_STEP = '1.6'; // 알림장의 채팅 아이디 추출
-  const qChat = await QTS.getChatIds.fQuery(baseUrl, { avAnnIds });
+  const qChat = await QTS.getChatIds.fQuery(baseUrl, {
+    avAnnIds: avAnnIds.sql('(', ')'),
+  });
   if (qChat.type === 'error')
     return qChat.onError(res, '1.6.1', 'searching chat ids');
 
-  const { chatIds } = qChat.message.rows[0];
+  const { chat_ids: chatIds } = qChat.message.rows[0];
 
   EXEC_STEP = '1.7'; // 알림장 삭제
   const qAnnDel = await QTS.delAnnouncement.fQuery(baseUrl, {
@@ -148,7 +151,7 @@ async function main(req, res) {
     { member_id: memberId, members, message: '알림장을 삭제했습니다.' },
   );
   if (qDel.type === 'error')
-    return qDel.onError(res, '1.7', 'fatal error while publishing message');
+    return qDel.onError(res, '1.9.1', 'fatal error while publishing message');
 
   return RESPOND(res, {
     message: '해당하는 알림장을 삭제하였습니다.',
