@@ -12,6 +12,7 @@ const QTS = {
   delKid: 'delKid',
   delSchoolRoles: 'delSchoolRoles',
   delMember: 'delMember',
+  delMemberPermissions: 'delMemberPermissions',
 };
 const baseUrl = 'sqls/member/remove'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
@@ -114,10 +115,14 @@ async function main(req, res) {
       return qDel.onError(res, EXEC_STEP, 'fatal error while deleting file');
   }
 
-  EXEC_STEP = '3.6'; // #3.3 member 삭제
+  EXEC_STEP = '3.6'; // #3.3 member_permissions 삭제
+  const qMP = await QTS.delMemberPermissions.fQuery(baseUrl, { memberId });
+  if (qMP.type === 'error')
+    return qMP.onError(res, '3.6.1', 'deleting member_permissions');
+
+  EXEC_STEP = '3.7'; // #3.3 member 삭제
   const qSM = await QTS.delMember.fQuery(baseUrl, { memberId });
-  if (qSM.type === 'error')
-    return qSM.onError(res, '3.3.1', 'searching member');
+  if (qSM.type === 'error') return qSM.onError(res, '3.7.1', 'deleting member');
 
   return RESPOND(res, {
     message: '프로필을 테이블에서 영구 삭제했습니다.',
