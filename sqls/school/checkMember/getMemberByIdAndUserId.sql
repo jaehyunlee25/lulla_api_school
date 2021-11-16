@@ -6,7 +6,7 @@ select
     r.grade
 from
     members m
-    left join school_roles r on m.school_id = r.school_id
+    left join school_roles r on m.school_role_id = r.id
 where
     m.id = '${memberId}'
     and m.user_id = '${userId}';
