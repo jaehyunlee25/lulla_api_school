@@ -6,7 +6,7 @@ select
     r.grade
 from
     members m
-    left join school_roles r on m.school_id = r.school_id
+    left join school_roles r on m.school_role_id = r.id
     left join schools s on m.school_id = s.id
 where
     s.activated = true
