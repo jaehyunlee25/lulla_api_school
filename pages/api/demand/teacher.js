@@ -9,7 +9,7 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
-  getInvitation: 'getDemand',
+  getDemand: 'getDemand',
   newDemand: 'newDemand',
   getAdminPhone: 'getAdminPhone',
 };
@@ -64,7 +64,7 @@ async function main(req, res) {
   const demandId = qNew.message.rows[0].id;
 
   // #3.5. 초대장 정보를 가져온다.
-  const qGet = await QTS.getInvitation.fQuery(baseUrl, { demandId });
+  const qGet = await QTS.getDemand.fQuery(baseUrl, { demandId });
   if (qGet.type === 'error')
     return qGet.onError(res, '3.5.1', 'searching demand');
   const demand = qGet.message.rows[0];
@@ -84,7 +84,7 @@ async function main(req, res) {
       authorization: req.headers.authorization,
     },
     {
-      message: `'${demand.school_name}'에서 요청장을 보냈습니다. [랄라]`,
+      message: `'${demand.school_name}'에서 선생님 요청장을 보냈습니다. [랄라]`,
       phone,
     },
   );

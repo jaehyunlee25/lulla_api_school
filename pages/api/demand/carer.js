@@ -9,11 +9,12 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
-  getMIUI: 'getMemberByIdAndUserId',
-  getInvitation: 'getInvitation',
-  newInvitation: 'newInvitation',
+  getDemand: 'getDemand',
+  newDemand: 'newDemand',
+  newKid: 'newKid',
+  getAdminPhone: 'getAdminPhone',
 };
-const baseUrl = 'sqls/invite/carer'; // 끝에 슬래시 붙이지 마시오.
+const baseUrl = 'sqls/demand/carer'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // 회원가입
   // 기능: : 탈퇴회원 활성화,  혹은 신규멤버 등록 및 보안토큰 발행,  관련멤버명단 추출
@@ -35,21 +36,15 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.invite.carer.3.2.2',
+      id: 'ERR.demand.carer.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
     });
   }
 }
 async function main(req, res) {
-  const { invitation, member_id: memberId } = req.body;
-  const {
-    phone,
-    role_name: roleName,
-    class_id: classId,
-    kid_name: kidName,
-    type,
-  } = invitation;
+  const { school_id: schoolId, class_id: classId, kid } = req.body;
+  const { name: kidName, birth: kidBirth, gender: kidGender } = kid;
 
   // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
@@ -58,47 +53,40 @@ async function main(req, res) {
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
   const userId = qUserId.message;
 
-  // #3.2. member 검색
-  // #3.2.1.
-  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
-  if (qMIUI.type === 'error')
-    return qMIUI.onError(res, '3.2.2', 'searching member');
-  // #3.2.2.
-  if (qMIUI.message.rows.length === 0)
-    return ERROR(res, {
-      resultCode: 400,
-      id: 'ERR.invite.carer.3.2.3',
-      message: 'no such member',
-    });
-  const { school_id: schoolId, grade } = qMIUI.message.rows[0];
+  // #3.3. kid를 등록한다.
+  const qNewKid = await QTS.newKid.fQuery(baseUrl, {
+    kidName,
+    kidBirth,
+    kidGender, // 0: 남자, 1: 여자
+  });
+  if (qNewKid.type === 'error')
+    return qNewKid.onError(res, '3.4.1', 'creating demand');
+  const kidId = qNewKid.message.rows[0].id;
 
-  // #3.3. 보호자 초대는 1. 원장, 2. 관리자만이 가능하다.
-  if (grade > 2)
-    return ERROR(res, {
-      resultCode: 401,
-      id: 'ERR.invite.carer.3.3.1',
-      message: '보호자 초대장을 생성할 권한이 없습니다.',
-    });
-
-  // #3.4. 초대장을 생성한다.
-  const qNew = await QTS.newInvitation.fQuery(baseUrl, {
-    type,
+  // #3.4. 요청장을 생성한다.
+  const roleType = 5;
+  const qNew = await QTS.newDemand.fQuery(baseUrl, {
+    roleType,
+    userId,
     classId,
     schoolId,
-    phone,
-    roleName,
-    kidName,
-    memberId,
+    kidId,
   });
   if (qNew.type === 'error')
-    return qNew.onError(res, '3.4.1', 'creating invitation');
-  const invId = qNew.message.rows[0].id;
+    return qNew.onError(res, '3.4.1', 'creating demand');
+  const demandId = qNew.message.rows[0].id;
 
   // #3.5. 초대장 정보를 가져온다.
-  const qGet = await QTS.getInvitation.fQuery(baseUrl, { invId });
+  const qGet = await QTS.getDemand.fQuery(baseUrl, { demandId });
   if (qGet.type === 'error')
-    return qGet.onError(res, '3.4.1', 'searching invitation');
-  const inv = qGet.message.rows[0];
+    return qGet.onError(res, '3.5.1', 'searching demand');
+  const demand = qGet.message.rows[0];
+
+  // #3.5.2. 학원 원장선생님의 전화번호를 가져온다.
+  const qPhone = await QTS.getAdminPhone.fQuery(baseUrl, { schoolId });
+  if (qPhone.type === 'error')
+    return qPhone.onError(res, '3.5.1', 'searching demand');
+  const { phone } = qPhone.message.rows[0];
 
   // #3.6. 문자 메시지를 전송한다.
   const qMember = await POST(
@@ -109,7 +97,7 @@ async function main(req, res) {
       authorization: req.headers.authorization,
     },
     {
-      message: `'${inv.school_name}'에서 초대장을 보냈습니다. [랄라]`,
+      message: `'${demand.school_name}'에서 보호자 요청장을 보냈습니다. [랄라]`,
       phone,
     },
   );
@@ -118,7 +106,7 @@ async function main(req, res) {
 
   // #3.7. 리턴
   return RESPOND(res, {
-    invitation: inv,
+    demand,
     resultCode: 200,
     message: '초대장을 성공적으로 반환하였습니다.',
   });
