@@ -9,7 +9,7 @@ select
     s.tel school_tel,
     c.id class_id, 
     c.name class_name, 
-    c.description class_description
+    c.description class_description,
     k.name kid_name,
 	k.birth kid_birth,
 	k.gender kid_gender
