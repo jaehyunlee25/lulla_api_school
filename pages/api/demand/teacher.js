@@ -3,7 +3,7 @@ import {
   RESPOND,
   ERROR,
   getUserIdFromToken,
-  // POST,
+  POST,
 } from '../../../lib/apiCommon'; // include String.prototype.fQuery
 import '../../../lib/pgConn'; // include String.prototype.fQuery
 
@@ -11,6 +11,7 @@ const QTS = {
   // Query TemplateS
   getInvitation: 'getDemand',
   newDemand: 'newDemand',
+  getAdminPhone: 'getAdminPhone',
 };
 const baseUrl = 'sqls/demand/teacher'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
@@ -68,8 +69,14 @@ async function main(req, res) {
     return qGet.onError(res, '3.5.1', 'searching demand');
   const demand = qGet.message.rows[0];
 
+  // #3.5.2. 학원 원장선생님의 전화번호를 가져온다.
+  const qPhone = await QTS.getAdminPhone.fQuery(baseUrl, { schoolId });
+  if (qPhone.type === 'error')
+    return qPhone.onError(res, '3.5.1', 'searching demand');
+  const { phone } = qPhone.message.rows[0];
+
   // #3.6. 문자 메시지를 전송한다.
-  /* const qMember = await POST(
+  const qMember = await POST(
     'send',
     '/sms',
     {
@@ -77,12 +84,12 @@ async function main(req, res) {
       authorization: req.headers.authorization,
     },
     {
-      message: `'${inv.school_name}'에서 초대장을 보냈습니다. [랄라]`,
+      message: `'${demand.school_name}'에서 요청장을 보냈습니다. [랄라]`,
       phone,
     },
   );
   if (qMember.type === 'error')
-    return qMember.onError(res, '3.2', 'fatal error while searching member'); */
+    return qMember.onError(res, '3.2', 'fatal error while searching member');
 
   // #3.7. 리턴
   return RESPOND(res, {

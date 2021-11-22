@@ -11,7 +11,7 @@ select
     c.name class_name, 
     c.description class_description
 from demand d
-    left join class c on c.id = i.class_id 
-    join schools s on s.id = i.school_id 
+    left join class c on c.id = d.class_id 
+    join schools s on s.id = d.school_id 
 where 
-    i.id = '${demandId}';
+    d.id = '${demandId}';
