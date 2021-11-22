@@ -1,6 +1,6 @@
-update
+select
+    *
+from
     demand
-set
-    is_denied = true
 where
     id = '${demandId}';

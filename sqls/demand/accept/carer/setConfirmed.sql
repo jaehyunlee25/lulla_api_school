@@ -1,6 +1,6 @@
 update
-    invitation
+    demand
 set
     confirmed = true
 where
-    id = '${invitationId}';
+    id = '${demandId}';

@@ -22,4 +22,5 @@ where
 	d.school_id = '${schoolId}'
 	and d.class_id = '${classId}'
 	and d.role_type = '${roleType}'
-	and confirmed = ${confirmed};
+	and confirmed = ${confirmed}
+	and is_denied = false;
