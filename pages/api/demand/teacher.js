@@ -9,7 +9,7 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
-  getInvitation: 'getInvitation',
+  getInvitation: 'getDemand',
   newDemand: 'newDemand',
 };
 const baseUrl = 'sqls/demand/teacher'; // 끝에 슬래시 붙이지 마시오.

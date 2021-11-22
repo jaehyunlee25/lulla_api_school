@@ -6,7 +6,7 @@ insert into
         class_id,
         role_type,
         created_at,
-        updated_at,
+        updated_at
     )
 values(
     uuid_generate_v1(),
@@ -15,5 +15,5 @@ values(
     '${classId}',
     '${roleType}',
     now(),
-    now(),
+    now()
 ) returning id;
