@@ -1,20 +1,21 @@
 select 
-	i.id, 
+	d.id, 
 	u.name user_name,
 	s.name school_name, 
 	c.name class_name,
-	m.nickname inviter,
-	i.role_name, 
-	i.phone, 
-	to_char(i.created_at, 'YYYY.MM.DD') date 
+	case d.role_type
+		when 3 then '선생님'
+		when 5 then '보호자'
+	end role_name, 
+	u.phone phone,
+	to_char(d.created_at, 'YYYY.MM.DD') date 
 from 
-	invitation i
-	left join schools s on i.school_id = s.id
-	left join class c on i.class_id = c.id
-	left join members m on i.inviter_id = m.id
-	left join users u on u.id = i.user_id
+	demand d
+	left join schools s on d.school_id = s.id
+	left join class c on d.class_id = c.id
+	left join users u on u.id = d.user_id
 where
-	i.school_id = '${schoolId}'
-	and i.class_id = '${classId}'
-	and i.role_name = '${roleName}'
+	d.school_id = '${schoolId}'
+	and d.class_id = '${classId}'
+	and d.role_type = '${roleType}'
 	and confirmed = ${confirmed};

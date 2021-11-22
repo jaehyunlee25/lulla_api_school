@@ -7,7 +7,7 @@ const QTS = {
   getCarers: 'getCarers',
   getMIUI: 'getMemberByIdAndUserId',
 };
-const baseUrl = 'sqls/invite/getCarers'; // 끝에 슬래시 붙이지 마시오.
+const baseUrl = 'sqls/demand/getCarers'; // 끝에 슬래시 붙이지 마시오.
 export default async function handler(req, res) {
   // 회원가입
   // 기능: : 탈퇴회원 활성화,  혹은 신규멤버 등록 및 보안토큰 발행,  관련멤버명단 추출
@@ -29,19 +29,14 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.invite.getCarers.3.2.2',
+      id: 'ERR.demand.getCarers.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
     });
   }
 }
 async function main(req, res) {
-  const {
-    member_id: memberId,
-    class_id: classId,
-    confirmed,
-    role_name: roleName,
-  } = req.body;
+  const { member_id: memberId, class_id: classId, confirmed } = req.body;
 
   // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
@@ -64,7 +59,7 @@ async function main(req, res) {
     });
   const { school_id: schoolId, grade } = qMIUI.message.rows[0];
 
-  // #3.3. 선생님 초대장 검색은 1. 원장, 2. 관리자만이 가능하다.
+  // #3.3. 보호자 초대장 검색은 1. 원장, 2. 관리자만이 가능하다.
   if (grade > 2)
     return ERROR(res, {
       resultCode: 401,
@@ -72,12 +67,13 @@ async function main(req, res) {
       message: '선생님 초대를 검색할 권한이 없습니다.',
     });
 
-  // #3.4. 초대장을 생성한다.
+  // #3.4. 요청장을 조회한다.
+  const roleType = 5;
   const qGet = await QTS.getCarers.fQuery(baseUrl, {
     schoolId,
     classId,
     confirmed,
-    roleName,
+    roleType,
   });
   if (qGet.type === 'error')
     return qGet.onError(res, '3.4.1', 'searching invitation');
