@@ -34,12 +34,12 @@ async function main(req, res) {
   EXEC_STEP = '3.0'; // #3.0. 사용자 토큰을 이용해 유효성을 검증하고, 필요하면 userId를 추출한다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
   if (qUserId.type === 'error') return qUserId.onError(res, '3.0');
-  const userId = qUserId.message;
+  // const userId = qUserId.message;
 
   EXEC_STEP = '3.0.1'; // 원 생성
-  const { member_id: memberId, search } = req.body;
+  const { search } = req.body;
 
-  EXEC_STEP = '3.1'; // #3.1. member 검색
+  /* EXEC_STEP = '3.1'; // #3.1. member 검색
   const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.1.1', 'searching member');
@@ -57,7 +57,7 @@ async function main(req, res) {
       resultCode: 204,
       id: 'ERR.school.list.3.2.1',
       message: '등록된 원 목록을 검색할 권한이 없습니다.',
-    });
+    }); */
 
   EXEC_STEP = '3.3'; // #3.3. 원 검색
   const qList = await QTS.getList.fQuery(baseUrl, { search });
