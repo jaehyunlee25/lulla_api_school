@@ -76,7 +76,7 @@ async function main(req, res) {
     return qNew.onError(res, '3.4.1', 'creating demand');
   const demandId = qNew.message.rows[0].id;
 
-  // #3.5. 초대장 정보를 가져온다.
+  // #3.5. 요청장 정보를 가져온다.
   const qGet = await QTS.getDemand.fQuery(baseUrl, { demandId });
   if (qGet.type === 'error')
     return qGet.onError(res, '3.5.1', 'searching demand');

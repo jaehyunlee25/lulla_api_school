@@ -3,7 +3,13 @@ select
     gender,
     birth,
     image_id,
-    (select relation from members where kid_id = '${kidId}') relation
+    (select 
+	 	sr.name 
+	 from 
+	 	members m
+	 	left join school_roles sr on sr.id = m.school_role_id
+	 where 
+	 	m.kid_id = '${kidId}') relation
 from
     kid
 where
