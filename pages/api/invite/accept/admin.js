@@ -92,7 +92,10 @@ async function main(req, res) {
   const memberId = qMember.message.rows[0].id;
 
   EXEC_STEP = '3.5'; // #3.5. invitation table의 confirmed를 true로
-  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, { invitationId });
+  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, {
+    invitationId,
+    memberId,
+  });
   if (qConfirmed.type === 'error')
     return qConfirmed.onError(res, '3.5.1', 'updating invitation');
 

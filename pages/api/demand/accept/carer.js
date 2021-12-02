@@ -116,7 +116,10 @@ async function main(req, res) {
   const demandMemberId = qMember.message.rows[0].id;
 
   // #3.5. demand table의 confirmed를 true로
-  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, { demandId });
+  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, {
+    demandId,
+    memberId: demandMemberId,
+  });
   if (qConfirmed.type === 'error')
     return qConfirmed.onError(res, '3.5.1', 'updating demand');
 
