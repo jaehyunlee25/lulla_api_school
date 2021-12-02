@@ -5,6 +5,7 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 const QTS = {
   // Query TemplateS
   getTeachers: 'getTeachers',
+  getConfirmedTeachers: 'getConfirmedTeachers',
   getMIUI: 'getMemberByIdAndUserId',
 };
 const baseUrl = 'sqls/invite/getTeachers'; // 끝에 슬래시 붙이지 마시오.
@@ -73,14 +74,25 @@ async function main(req, res) {
     });
 
   // #3.4. 초대장 정보를 가져온다.
-  const qGet = await QTS.getTeachers.fQuery(baseUrl, {
-    schoolId,
-    classId,
-    confirmed,
-    roleName,
-  });
-  if (qGet.type === 'error')
-    return qGet.onError(res, '3.4.1', 'searching invitation');
+  let qGet;
+  if (confirmed) {
+    qGet = await QTS.getConfirmedTeachers.fQuery(baseUrl, {
+      schoolId,
+      classId,
+      roleName,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.4.1', 'searching invitation');
+  } else {
+    qGet = await QTS.getTeachers.fQuery(baseUrl, {
+      schoolId,
+      classId,
+      confirmed,
+      roleName,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.4.1', 'searching invitation');
+  }
   const teachers = qGet.message.rows;
 
   // #3.7. 리턴

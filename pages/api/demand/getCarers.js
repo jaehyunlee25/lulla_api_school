@@ -5,6 +5,7 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 const QTS = {
   // Query TemplateS
   getCarers: 'getCarers',
+  getConfirmedCarers: 'getConfirmedCarers',
   getMIUI: 'getMemberByIdAndUserId',
 };
 const baseUrl = 'sqls/demand/getCarers'; // 끝에 슬래시 붙이지 마시오.
@@ -69,14 +70,25 @@ async function main(req, res) {
 
   // #3.4. 요청장을 조회한다.
   const roleType = 5;
-  const qGet = await QTS.getCarers.fQuery(baseUrl, {
-    schoolId,
-    classId,
-    confirmed,
-    roleType,
-  });
-  if (qGet.type === 'error')
-    return qGet.onError(res, '3.4.1', 'searching invitation');
+  let qGet;
+  if (confirmed) {
+    qGet = await QTS.getConfirmedCarers.fQuery(baseUrl, {
+      schoolId,
+      classId,
+      roleType,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.4.1', 'searching invitation');
+  } else {
+    qGet = await QTS.getCarers.fQuery(baseUrl, {
+      schoolId,
+      classId,
+      confirmed,
+      roleType,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.4.2', 'searching invitation');
+  }
   const carers = qGet.message.rows;
 
   // #3.7. 리턴
