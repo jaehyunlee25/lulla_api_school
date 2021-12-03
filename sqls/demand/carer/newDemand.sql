@@ -1,6 +1,7 @@
 insert into
     demand(
         id,
+        relation,
         user_id,
         school_id,
         class_id,
@@ -11,6 +12,7 @@ insert into
     )
 values(
     uuid_generate_v1(),
+    '${relation}',
     '${userId}',
     '${schoolId}',
     '${classId}',

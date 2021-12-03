@@ -44,7 +44,7 @@ export default async function handler(req, res) {
 }
 async function main(req, res) {
   const { school_id: schoolId, class_id: classId, kid } = req.body;
-  const { name: kidName, birth: kidBirth, gender: kidGender } = kid;
+  const { name: kidName, birth: kidBirth, gender: kidGender, relation } = kid;
 
   // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
@@ -71,6 +71,7 @@ async function main(req, res) {
     classId,
     schoolId,
     kidId,
+    relation,
   });
   if (qNew.type === 'error')
     return qNew.onError(res, '3.4.1', 'creating demand');
