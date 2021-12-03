@@ -3,10 +3,12 @@ select
 	u.name user_name,
 	s.name school_name, 
 	c.name class_name,
+	d.role_type,
 	case d.role_type
 		when 3 then '선생님'
 		when 5 then '보호자'
-	end role_name, 
+	end role_name,
+	d.relation,
 	u.phone, 
 	k.name kid_name,
 	k.birth kid_birth,
