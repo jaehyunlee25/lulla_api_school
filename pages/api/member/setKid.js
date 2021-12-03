@@ -6,6 +6,8 @@ const QTS = {
   getMIUI: 'getMemberByIdAndUserId',
   getKid: 'getKid',
   setKid: 'setKid',
+  setSchoolRoles: 'setSchoolRoles',
+  getSchoolRolesId: 'getSchoolRolesId',
 };
 let EXEC_STEP = 0;
 const baseUrl = 'sqls/member/setKid'; // 끝에 슬래시 붙이지 마시오.
@@ -44,6 +46,7 @@ async function main(req, res) {
   const { member_id: memberId, kid: userKid } = req.body;
   const {
     id: kidId,
+    relation,
     /* name: kidName,
     birth: kidBirth,
     gender: kidGender,
@@ -75,7 +78,7 @@ async function main(req, res) {
   EXEC_STEP = '3.6.'; // #3.4 kid 조회
   const qGetKid = await QTS.getKid.fQuery(baseUrl, { kidId });
   if (qGetKid.type === 'error')
-    return qGetKid.onError(res, '3.6.1', 'searching member');
+    return qGetKid.onError(res, '3.6.1', 'searching kid');
   const kid = qGetKid.message.rows[0];
 
   EXEC_STEP = '3.7.'; // #3.7 kid 정보 수정
@@ -88,12 +91,26 @@ async function main(req, res) {
   EXEC_STEP = '3.8.'; // #3.8 kid 테이블 수정
   const qSetKid = await QTS.setKid.fQuery(baseUrl, kid);
   if (qSetKid.type === 'error')
-    return qSetKid.onError(res, '3.8.1', 'searching member');
+    return qSetKid.onError(res, '3.8.1', 'updating kid');
 
-  EXEC_STEP = '3.9.'; // kid 정보 조회
+  EXEC_STEP = '3.9.'; // school_roles 정보 검색
+  const qSRI = await QTS.getSchoolRolesId.fQuery(baseUrl, { memberId });
+  if (qSRI.type === 'error')
+    return qSRI.onError(res, '3.9.1', 'searching school_roles id');
+  const schoolRolesId = qSRI.message.rows[0].school_role_id;
+
+  EXEC_STEP = '3.10.'; // school_roles에 relation 정보 수정
+  const qSR = await QTS.setSchoolRoles.fQuery(baseUrl, {
+    schoolRolesId,
+    relation,
+  });
+  if (qSR.type === 'error')
+    return qSR.onError(res, '3.10.1', 'updating school_roles');
+
+  EXEC_STEP = '3.11.'; // kid 정보 조회
   const qGet = await QTS.getKid.fQuery(baseUrl, { kidId });
   if (qGet.type === 'error')
-    return qGet.onError(res, '3.9.1', 'searching member');
+    return qGet.onError(res, '3.11.1', 'searching member');
   const data = qGet.message.rows[0];
 
   return RESPOND(res, {
