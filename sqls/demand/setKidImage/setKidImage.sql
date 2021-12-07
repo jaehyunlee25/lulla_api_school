@@ -1,6 +1,6 @@
 update
     kid
 set
-    kid_image = '${kidImageId}'
+    image_id = '${kidImageId}'
 where
     id = '${kidId}';
