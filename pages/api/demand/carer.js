@@ -108,6 +108,7 @@ async function main(req, res) {
   // #3.7. 리턴
   return RESPOND(res, {
     demand,
+    kidId,
     resultCode: 200,
     message: '초대장을 성공적으로 반환하였습니다.',
   });
