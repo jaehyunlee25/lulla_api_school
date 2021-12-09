@@ -101,7 +101,7 @@ async function main(req, res) {
       authorization: req.headers.authorization,
     },
     {
-      message: `'${inv.school_name}'에서 초대장을 보냈습니다. http://dev.lulla.co.kr/app/applink?code=${invId}`,
+      message: `'${inv.school_name}'에서 초대장을 보냈습니다. http://dev.lulla.co.kr/app/applink.html?code=${invId}`,
       phone,
     },
   );
