@@ -7,7 +7,6 @@ insert into
         school_id,
         phone,
         role_name,
-        kid_name,
         inviter_id
     )
 values(
@@ -18,6 +17,5 @@ values(
     '${schoolId}',
     '${phone}',
     '${roleName}',
-    '${kidName}',
     '${memberId}'
 ) returning id;
