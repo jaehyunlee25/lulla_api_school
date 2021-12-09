@@ -1,7 +1,6 @@
 update
     demand
 set
-    confirmed = true,
-    member_id = '${memberId}'
+    confirmed = true
 where
     id = '${demandId}';
