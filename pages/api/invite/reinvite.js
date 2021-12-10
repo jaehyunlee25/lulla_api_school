@@ -11,7 +11,6 @@ const QTS = {
   // Query TemplateS
   getMIUI: 'getMemberByIdAndUserId',
   getInvitation: 'getInvitation',
-  newInvitation: 'newInvitation',
 };
 const baseUrl = 'sqls/invite/reinvite'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
@@ -65,7 +64,7 @@ async function main(req, res) {
       id: 'ERR.invite.admin.3.2.3',
       message: 'no such member',
     });
-  const { school_id: schoolId, grade } = qMIUI.message.rows[0];
+  const { /* school_id: schoolId, */ grade } = qMIUI.message.rows[0];
 
   // #3.3. 관리자 초대는 1. 원장, 2. 관리자만이 가능하다.
   if (grade > 2)
@@ -97,12 +96,12 @@ async function main(req, res) {
     },
   );
   if (qMember.type === 'error')
-    return qMember.onError(res, '3.2', 'fatal error while searching member');
+    return qMember.onError(res, '3.6', 'fatal error while sending sms');
 
   // #3.7. 리턴
   return RESPOND(res, {
     invitation: inv,
     resultCode: 200,
-    message: '초대장을 성공적으로 반환하였습니다.',
+    message: '초대장을 다시 전송하였습니다.',
   });
 }
