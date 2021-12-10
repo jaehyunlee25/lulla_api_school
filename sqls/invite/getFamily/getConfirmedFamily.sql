@@ -1,7 +1,8 @@
 select 
 	m.id member_id,
 	m.nickname member_name,
-	sr.name relation,
+	sr.name role_name,
+	sr.grade member_grade,
 	m.kid_id,
 	m.image_id member_image_id,
 	to_char(m.created_at, 'YYYY.MM.DD') accept_date
