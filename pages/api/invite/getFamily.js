@@ -4,6 +4,7 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
+  getKidId: 'getKidId',
   getFamily: 'getFamily',
   getMIUI: 'getMemberByIdAndUserId',
 };
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
   }
 }
 async function main(req, res) {
-  const { member_id: memberId } = req.body;
+  const { member_id: memberId, confirmed } = req.body;
 
   EXEC_STEP = '3.1.'; // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
@@ -69,12 +70,35 @@ async function main(req, res) {
       message: '가족 초대를 검색할 권한이 없습니다.',
     });
 
-  EXEC_STEP = '3.4.'; // #3.4. 초대장을 검색한다.
-  const qGet = await QTS.getFamily.fQuery(baseUrl, {
-    schoolId,
-  });
-  if (qGet.type === 'error')
-    return qGet.onError(res, '3.4.1', 'searching invitation');
+  EXEC_STEP = '3.4.'; // #3.3. 보호자의 kid_id를 검색한다.
+  const qGetKid = await QTS.getKidId.fQuery(baseUrl, { memberId });
+  if (qGetKid.type === 'error')
+    return qGetKid.onError(res, '3.4.1', 'searching a kid of member');
+
+  const kidId = qGetKid.message.rows[0].kid_id;
+  if (!kidId)
+    return ERROR(res, {
+      resultCode: 401,
+      id: 'ERR.invite.getFamily.3.4.1',
+      message: '해당하는 kid가 존재하지 않습니다.',
+    });
+
+  EXEC_STEP = '3.5.'; // #3.5. 초대장을 검색한다.
+  let qGet;
+  if (confirmed) {
+    qGet = await QTS.getConfirmedFamily.fQuery(baseUrl, {
+      schoolId,
+      kidId,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.5.1', 'searching invitation');
+  } else {
+    qGet = await QTS.getFamily.fQuery(baseUrl, {
+      schoolId,
+    });
+    if (qGet.type === 'error')
+      return qGet.onError(res, '3.5.2', 'searching invitation');
+  }
   const family = qGet.message.rows;
 
   EXEC_STEP = '3.7.'; // #3.7. 리턴
