@@ -47,7 +47,7 @@ async function main(req, res) {
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
   const userId = qUserId.message;
 
-  // #3.2. member 검색
+  EXEC_STEP = '3.2.'; // #3.2. member 검색
   // #3.2.1.
   const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
@@ -61,7 +61,7 @@ async function main(req, res) {
     });
   const { school_id: schoolId, grade } = qMIUI.message.rows[0];
 
-  // #3.3. 관리자 초대장 검색은 1. 원장, 2. 관리자만이 가능하다.
+  EXEC_STEP = '3.3.'; // #3.3. 관리자 초대장 검색은 1. 원장, 2. 관리자만이 가능하다.
   if (grade > 2)
     return ERROR(res, {
       resultCode: 401,
@@ -69,7 +69,7 @@ async function main(req, res) {
       message: '선생님 초대를 검색할 권한이 없습니다.',
     });
 
-  // #3.4. 초대장을 검색한다.
+  EXEC_STEP = '3.4.'; // #3.4. 초대장을 검색한다.
   const qGet = await QTS.getAdmins.fQuery(baseUrl, {
     schoolId,
   });
@@ -77,7 +77,7 @@ async function main(req, res) {
     return qGet.onError(res, '3.4.1', 'searching invitation');
   const admins = qGet.message.rows;
 
-  // #3.7. 리턴
+  EXEC_STEP = '3.7.'; // #3.7. 리턴
   return RESPOND(res, {
     admins,
     resultCode: 200,
