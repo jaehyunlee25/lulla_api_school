@@ -9,7 +9,8 @@ select
     s.tel school_tel,
     c.id class_id, 
     c.name class_name, 
-    c.description class_description
+    c.description class_description,
+    i.phone phone
 from invitation i
     -- join users u on u.id = i.user_id 
     -- left join kid k on k.id = i.kid_id
