@@ -18,4 +18,5 @@ where
 	i.school_id = '${schoolId}'
 	and i.class_id = '${classId}'
 	and i.role_name = '${roleName}'
-	and confirmed = ${confirmed};
+	and confirmed = ${confirmed}
+	and is_denied = false;
