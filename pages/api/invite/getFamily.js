@@ -6,6 +6,7 @@ const QTS = {
   // Query TemplateS
   getKidId: 'getKidId',
   getFamily: 'getFamily',
+  getConfirmedFamily: 'getConfirmedFamily',
   getMIUI: 'getMemberByIdAndUserId',
 };
 const baseUrl = 'sqls/invite/getFamily'; // 끝에 슬래시 붙이지 마시오.
