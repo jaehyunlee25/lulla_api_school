@@ -11,7 +11,7 @@ insert into
 values(
     uuid_generate_v1(),
     '${schoolId}',
-    5,
+    6,
     '${roleName}',
     '',
     now(),
