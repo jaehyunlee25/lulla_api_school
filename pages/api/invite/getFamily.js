@@ -96,6 +96,7 @@ async function main(req, res) {
   } else {
     qGet = await QTS.getFamily.fQuery(baseUrl, {
       schoolId,
+      memberId,
     });
     if (qGet.type === 'error')
       return qGet.onError(res, '3.5.2', 'searching invitation');
