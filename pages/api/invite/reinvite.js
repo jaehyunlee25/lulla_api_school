@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.invite.admin.3.2.2',
+      id: 'ERR.invite.reinvite.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
       step: EXEC_STEP,
@@ -64,15 +64,15 @@ async function main(req, res) {
       id: 'ERR.invite.admin.3.2.3',
       message: 'no such member',
     });
-  const { /* school_id: schoolId, */ grade } = qMIUI.message.rows[0];
+  // const { /* school_id: schoolId, */ grade } = qMIUI.message.rows[0];
 
   // #3.3. 관리자 초대는 1. 원장, 2. 관리자만이 가능하다.
-  if (grade > 2)
+  /* if (grade > 2)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.invite.admin.3.3.1',
+      id: 'ERR.invite.reinvite.3.3.1',
       message: '관리자 초대장을 생성할 권한이 없습니다.',
-    });
+    }); */
 
   // #3.5. 초대장 정보를 가져온다.
   const qGet = await QTS.getInvitation.fQuery(baseUrl, { invId });
