@@ -74,7 +74,7 @@ async function main(req, res) {
   const schoolId = inv.school_id;
   const classId = inv.class_id;
   const roleName = inv.role_name;
-  const kidName = inv.kid_name;
+  const kidId = inv.kid_id;
 
   EXEC_STEP = '3.3'; // #3.3. 역할 등록
   const qSR = await QTS.newSchoolRoles.fQuery(baseUrl, { schoolId, roleName });
@@ -83,10 +83,10 @@ async function main(req, res) {
   const schoolRoleId = qSR.message.rows[0].id;
 
   EXEC_STEP = '3.3.2'; // #3.3. kid 등록
-  const qKid = await QTS.newKid.fQuery(baseUrl, { kidName });
+  /* const qKid = await QTS.newKid.fQuery(baseUrl, { kidName });
   if (qKid.type === 'error')
     return qKid.onError(res, '3.3.2.1', 'creating kid');
-  const kidId = qKid.message.rows[0].id;
+  const kidId = qKid.message.rows[0].id; */
 
   EXEC_STEP = '3.4'; // #3.4. 멤버 등록
   const qMember = await QTS.newMember.fQuery(baseUrl, {
