@@ -6,7 +6,7 @@ select
 	m.kid_id,
 	m.image_id member_image_id,
 	to_char(m.created_at, 'YYYY.MM.DD') accept_date,
-	concat(c.name,' ',k.name,'(',sr.name,')') member_nickname, 
+	concat(c.name,' ',k.name,'(',sr.name,')') member_nickname 
 from 
 	members m
 	left join school_roles sr on sr.id = m.school_role_id 
