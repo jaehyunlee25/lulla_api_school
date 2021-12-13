@@ -21,7 +21,8 @@ select
         WHEN sr.grade = 1 THEN concat(s.name) 
         WHEN sr.grade < 3 THEN concat(u.name,' ',sr.name) 
         WHEN sr.grade < 5 THEN concat(c.name,' ',u.name,' ','선생님') 
-        WHEN sr.grade = 5 THEN concat(c.name,' ',k.name,'(',m.nickname,')') 
+        WHEN sr.grade = 5 THEN concat(c.name,' ',k.name,'(',m.nickname,')')
+        WHEN sr.grade = 6 THEN concat(c.name,' ',k.name,'(',sr.name,')') 
     END member_nickname, 
     k.id kid_id,
     k.name kid_name 
