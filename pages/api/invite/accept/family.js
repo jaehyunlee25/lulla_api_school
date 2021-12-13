@@ -109,7 +109,7 @@ async function main(req, res) {
     return qConfirmed.onError(res, '3.5.1', 'updating invitation');
 
   EXEC_STEP = '3.6'; // #3.6. 리턴할 정보를 가져온다.
-  const qSMFG5 = await QTS.getSMFG5.fQuery(baseUrl, { memberId, classId });
+  const qSMFG5 = await QTS.getSMFG6.fQuery(baseUrl, { memberId, classId });
   if (qSMFG5.type === 'error')
     return qSMFG5.onError(res, '3.6.1', 'searching school member');
   const data = qSMFG5.message.rows;
