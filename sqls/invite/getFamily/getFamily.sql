@@ -13,7 +13,7 @@ from
 	left join users u on u.id = i.user_id
 where
 	i.school_id = '${schoolId}'
-	and i.inviter = '${memberId}'
+	and i.inviter_id = '${memberId}'
 	and i.type = 6
 	and confirmed = false
 	and is_denied = false;
