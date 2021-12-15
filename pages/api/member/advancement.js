@@ -1,18 +1,18 @@
 /* eslint-disable no-template-curly-in-string */
-import { RESPOND, ERROR, getUserIdFromToken } from '../../../../lib/apiCommon'; // include String.prototype.fQuery
-import '../../../../lib/pgConn'; // include String.prototype.fQuery
+import { RESPOND, ERROR, getUserIdFromToken } from '../../../lib/apiCommon'; // include String.prototype.fQuery
+import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
-  setConfirmed: 'setConfirmed',
-  getDemand: 'getDemand',
+  getProfile: 'getProfile',
   newMember: 'newMember',
-  getSMFG3: 'getSchoolMemberForGrade3',
+  getSMFG1: 'getSchoolMemberForGrade1',
   newSchoolRoles: 'newSchoolRoles',
   newMP: 'newMemberPermissions',
   getMIUI: 'getMemberByIdAndUserId',
 };
-const baseUrl = 'sqls/demand/accept/teacher'; // 끝에 슬래시 붙이지 마시오.
+const baseUrl = 'sqls/member/advancement'; // 끝에 슬래시 붙이지 마시오.
+let EXEC_STEP = 0;
 export default async function handler(req, res) {
   // 회원가입
   // 기능: : 탈퇴회원 활성화,  혹은 신규멤버 등록 및 보안토큰 발행,  관련멤버명단 추출
@@ -34,20 +34,21 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.demand.accept.teacher.3.2.2',
+      id: 'ERR.member.advancement.3.2.2',
       message: 'post server logic error',
       error: e.toString(),
+      step: EXEC_STEP,
     });
   }
 }
 async function main(req, res) {
   const {
     member_id: memberId,
-    demand_id: demandId,
+    teacher_member_id: teacherMemberId,
     role_name: roleName,
   } = req.body;
 
-  // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
+  EXEC_STEP = '3.1.'; // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
   // userId가 정상적으로 리턴되면, 활성화된 사용자이다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
@@ -55,7 +56,7 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // #3.2. member 검색
-  // #3.2.1.
+  EXEC_STEP = '3.2.1.'; // #3.2.1.
   const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.2.2', 'searching member');
@@ -63,39 +64,31 @@ async function main(req, res) {
   if (qMIUI.message.rows.length === 0)
     return ERROR(res, {
       resultCode: 400,
-      id: 'ERR.invite.getCarers.3.2.3',
+      id: 'ERR.member.advancement.3.2.3',
       message: 'no such member',
     });
   const { school_id: schoolId, grade } = qMIUI.message.rows[0];
 
-  // #3.3. 요청 승인은 1. 원장, 2. 관리자만이 가능하다.
+  EXEC_STEP = '3.3.'; // #3.3. 요청 승인은 1. 원장, 2. 관리자만이 가능하다.
   if (grade > 2)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.demand.getCarers.3.3.1',
-      message: '선생님 요청을 수락할 권한이 없습니다.',
+      id: 'ERR.member.advancement.3.3.1',
+      message: '관리자 승급을 시행할 권한이 없습니다.',
     });
 
-  // #3.2. demand 정보 가져오기
-  const qDemand = await QTS.getDemand.fQuery(baseUrl, { demandId });
-  if (qDemand.type === 'error')
-    return qDemand.onError(res, '3.2.1', 'searching demand');
+  EXEC_STEP = '3.4.'; // #3.4. profile 정보 가져오기
+  const qProfile = await QTS.getProfile.fQuery(baseUrl, { teacherMemberId });
+  if (qProfile.type === 'error')
+    return qProfile.onError(res, '3.2.1', 'searching profile');
 
-  if (qDemand.message.rows.length === 0)
+  if (qProfile.message.rows.length === 0)
     return ERROR(res, {
-      id: 'ERR.demand.accept.teacher.3.2.2',
-      message: '해당하는 요청장이 존재하지 않습니다.',
+      id: 'ERR.member.advancement.3.2.2',
+      message: '해당하는 선생님 프로필이 존재하지 않습니다.',
     });
 
-  const demand = qDemand.message.rows[0];
-
-  if (schoolId !== demand.school_id)
-    return ERROR(res, {
-      id: 'ERR.demand.accept.teacher.3.2.3',
-      message: '해당 요청을 승인할 권한이 없습니다.',
-    });
-
-  const classId = demand.class_id;
+  const teacherProfile = qProfile.message.rows[0];
 
   // #3.3. 역할 등록
   const qSR = await QTS.newSchoolRoles.fQuery(baseUrl, { schoolId, roleName });
@@ -105,36 +98,29 @@ async function main(req, res) {
 
   // #3.4. 멤버 등록
   const qMember = await QTS.newMember.fQuery(baseUrl, {
-    userId,
-    classId,
-    schoolId,
+    nickname: teacherProfile.nickname,
+    userId: teacherProfile.user_id,
+    schoolId: teacherProfile.school_id,
     schoolRoleId,
+    imageId: teacherProfile.image_id,
+    backgroundImageId: teacherProfile.background_image_id,
   });
   if (qMember.type === 'error')
     return qMember.onError(res, '3.4.1', 'creating member');
-  const demandMemberId = qMember.message.rows[0].id;
-
-  // #3.5. demand table의 confirmed를 true로
-  const qConfirmed = await QTS.setConfirmed.fQuery(baseUrl, {
-    demandId,
-    memberId: demandMemberId,
-  });
-  if (qConfirmed.type === 'error')
-    return qConfirmed.onError(res, '3.5.1', 'updating demand');
+  const adminMemberId = qMember.message.rows[0].id;
 
   // #3.7 member_permissions 에 추가한다.
   const qMP = await QTS.newMP.fQuery(baseUrl, {
-    memberId: demandMemberId,
+    memberId: adminMemberId,
     schoolId,
-    grade: 3,
+    grade: 2,
   });
   if (qMP.type === 'error')
     return qMP.onError(res, '3.7.1', 'insert member permissions');
 
   // #3.8. 리턴할 정보를 가져온다.
-  const qSMFG3 = await QTS.getSMFG3.fQuery(baseUrl, {
-    memberId: demandMemberId,
-    classId,
+  const qSMFG3 = await QTS.getSMFG1.fQuery(baseUrl, {
+    memberId: adminMemberId,
   });
   if (qSMFG3.type === 'error')
     return qSMFG3.onError(res, '3.8.1', 'searching school member');
@@ -144,6 +130,6 @@ async function main(req, res) {
   return RESPOND(res, {
     data,
     resultCode: 200,
-    message: '선생님 요청장을 수락했습니다.',
+    message: '선생님에 대한 관리자 승급이 성공했습니다.',
   });
 }
