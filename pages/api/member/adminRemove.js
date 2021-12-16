@@ -72,7 +72,7 @@ async function main(req, res) {
       id: 'ERR.member.adminRemove.3.2.2',
       message: '해당하는 데이터를 찾을 수 없습니다.',
     });
-  
+
   const adminGrade = qMember.message.rows[0].grade;
   if (adminGrade !== 2)
     return ERROR(res, {
