@@ -69,8 +69,16 @@ async function main(req, res) {
   if (qMember.message.rows.length === 0)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.member.remove.3.2.2',
+      id: 'ERR.member.adminRemove.3.2.2',
       message: '해당하는 데이터를 찾을 수 없습니다.',
+    });
+  
+  const adminGrade = qMember.message.rows[0].grade;
+  if (adminGrade !== 2)
+    return ERROR(res, {
+      resultCode: 401,
+      id: 'ERR.member.adminRemove.3.2.3',
+      message: '삭제하고자 하는 프로필이 관리자가 아닙니다.',
     });
 
   EXEC_STEP = '3.4'; // school_role 삭제

@@ -1,6 +1,8 @@
 select 
-    *
+    m.*,
+    sr.grade
 from
-    members
+    members m 
+    left join school_roles sr on sr.id = m.school_role_id
 where
-    id = '${adminId}';
+    m.id = '${adminId}';
