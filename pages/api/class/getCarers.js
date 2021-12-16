@@ -52,7 +52,11 @@ async function main(req, res) {
       id: 'ERR.class.getCarers.3.2.2',
       message: '토큰의 userId와 일치하는 member를 찾을 수 없습니다.',
     });
-  const { school_id: schoolId, class_id: classId, grade } = qMIUI.message.rows[0];
+  const { 
+    school_id: schoolId, 
+    class_id: classId, 
+    grade 
+  } = qMIUI.message.rows[0];
 
   if (grade !== 3)
     return ERROR(res, {
