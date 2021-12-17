@@ -8,13 +8,13 @@ import '../../../lib/pgConn'; // include String.prototype.fQuery
 
 const QTS = {
   // Query TemplateS
+  getMIUI: 'getMemberByIdAndUserId',
   getMember: 'getMember',
-  delKid: 'delKid',
   delSchoolRoles: 'delSchoolRoles',
   delMember: 'delMember',
   delMemberPermissions: 'delMemberPermissions',
 };
-const baseUrl = 'sqls/member/remove'; // 끝에 슬래시 붙이지 마시오.
+const baseUrl = 'sqls/member/adminRemove'; // 끝에 슬래시 붙이지 마시오.
 let EXEC_STEP = 0;
 export default async function handler(req, res) {
   // #1. cors 해제
@@ -31,7 +31,7 @@ export default async function handler(req, res) {
     return await main(req, res);
   } catch (e) {
     return ERROR(res, {
-      id: 'ERR.member.remove.3',
+      id: 'ERR.member.adminRemove.3',
       message: 'server logic error',
       error: e.toString(),
       step: EXEC_STEP,
@@ -46,36 +46,40 @@ async function main(req, res) {
   if (qUserId.type === 'error') return qUserId.onError(res, '3.1');
   const userId = qUserId.message;
 
-  // #3.2 userId와 memberId가 같은 멤버 조회
+  const { member_id: memberId, admin_id: adminId } = req.body;
+
+  // #3.2
   EXEC_STEP = '3.2.1'; // #3.2.1 memberId 유효성 점검
-  const { member_id: memberId } = req.body;
+  const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
+  if (qMIUI.type === 'error')
+    return qMIUI.onError(res, '3.2.1', 'searching member');
+  const { grade } = qMIUI.message.rows[0];
+
+  if (grade > 2)
+    return ERROR(res, {
+      resultCode: 401,
+      id: 'ERR.member.adminRemove.3.2.2',
+      message: '관리자 삭제를 시행할 권한이 없습니다.',
+    });
 
   EXEC_STEP = '3.2'; // #3.2 member 검색
-  const qMember = await QTS.getMember.fQuery(baseUrl, { memberId });
+  const qMember = await QTS.getMember.fQuery(baseUrl, { adminId });
   if (qMember.type === 'error')
     return qMember.onError(res, '3.2.1', 'searching member');
   if (qMember.message.rows.length === 0)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.member.remove.3.2.2',
+      id: 'ERR.member.adminRemove.3.2.2',
       message: '해당하는 데이터를 찾을 수 없습니다.',
     });
 
-  const memberUserId = qMember.message.rows[0].user_id;
-  if (userId !== memberUserId)
+  const adminGrade = qMember.message.rows[0].grade;
+  if (adminGrade !== 2)
     return ERROR(res, {
       resultCode: 401,
-      id: 'ERR.member.remove.3.2.3',
-      message: 'member profile 정보의 수정 권한이 없습니다.',
+      id: 'ERR.member.adminRemove.3.2.3',
+      message: '삭제하고자 하는 프로필이 관리자가 아닙니다.',
     });
-
-  EXEC_STEP = '3.3'; // kid 삭제
-  const kidId = qMember.message.rows[0].kid_id;
-  if (kidId) {
-    const qKid = await QTS.delKid.fQuery(baseUrl, { kidId });
-    if (qKid.type === 'error')
-      return qKid.onError(res, '3.3.1', 'searching member');
-  }
 
   EXEC_STEP = '3.4'; // school_role 삭제
   const schoolRoleId = qMember.message.rows[0].school_role_id;
@@ -116,16 +120,16 @@ async function main(req, res) {
   }
 
   EXEC_STEP = '3.6'; // #3.3 member_permissions 삭제
-  const qMP = await QTS.delMemberPermissions.fQuery(baseUrl, { memberId });
+  const qMP = await QTS.delMemberPermissions.fQuery(baseUrl, { adminId });
   if (qMP.type === 'error')
     return qMP.onError(res, '3.6.1', 'deleting member_permissions');
 
   EXEC_STEP = '3.7'; // #3.3 member 삭제
-  const qSM = await QTS.delMember.fQuery(baseUrl, { memberId });
+  const qSM = await QTS.delMember.fQuery(baseUrl, { adminId });
   if (qSM.type === 'error') return qSM.onError(res, '3.7.1', 'deleting member');
 
   return RESPOND(res, {
-    message: '프로필을 테이블에서 영구 삭제했습니다.',
+    message: '관리자 프로필을 테이블에서 영구 삭제했습니다.',
     resultCode: 200,
   });
 }

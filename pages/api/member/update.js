@@ -41,11 +41,14 @@ async function main(req, res) {
   // #3.2.1 memberId 유효성 점검
   const {
     member_id: memberId,
-    nickname,
     member_description: description,
     image_id: imageId,
     background_image_id: backgroundImageId,
   } = req.body;
+
+  let { nickname } = req.body;
+
+  if (nickname === undefined) nickname = '';
 
   // #3.2 member 검색
   const qMember = await QTS.getMember.fQuery(baseUrl, { memberId });
