@@ -88,6 +88,7 @@ async function main(req, res) {
       3: 'getSMFG3',
       4: 'getSMFG3',
       5: 'getSMFG5',
+      6: 'getSMFG5',
     };
     const qtsName = obQuery[grade];
     const qSMFG = await QTS[qtsName].fQuery(baseUrl, {
