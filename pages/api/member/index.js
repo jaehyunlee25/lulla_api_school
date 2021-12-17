@@ -17,6 +17,7 @@ const QTS = {
   getMIUI: 'getMemberByIdAndUserId',
 };
 const baseUrl = 'sqls/member/member'; // 끝에 슬래시 붙이지 마시오.
+let EXEC_STEP = 0;
 export default async function handler(req, res) {
   // #1. cors 해제
   res.writeHead(200, {
@@ -35,11 +36,12 @@ export default async function handler(req, res) {
       id: 'ERR.school.index.3',
       message: 'server logic error',
       error: e.toString(),
+      step: EXEC_STEP,
     });
   }
 }
 async function main(req, res) {
-  // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
+  EXEC_STEP = '3.1'; // #3.1. 사용자 토큰을 이용해 userId를 추출한다.
   // 이 getUserIdFromToken 함수는 user의 활성화 여부까지 판단한다.
   // userId가 정상적으로 리턴되면, 활성화된 사용자이다.
   const qUserId = await getUserIdFromToken(req.headers.authorization);
@@ -47,7 +49,7 @@ async function main(req, res) {
   const userId = qUserId.message;
 
   // #3.2 userId와 memberId가 같은 멤버 조회
-  // #3.2.1 memberId 유효성 점검
+  EXEC_STEP = '3.2.1.'; // #3.2.1 memberId 유효성 점검
   const { member_id: memberId, id: searchMemberId, type } = req.query;
 
   if (!memberId) {
@@ -62,7 +64,7 @@ async function main(req, res) {
     });
   }
 
-  // #3.2.2 member 검색
+  EXEC_STEP = '3.2.2.'; // #3.2.2 member 검색
   const qMIUI = await QTS.getMIUI.fQuery(baseUrl, { userId, memberId });
   if (qMIUI.type === 'error')
     return qMIUI.onError(res, '3.2.2', 'searching member');
@@ -78,7 +80,7 @@ async function main(req, res) {
     grade,
   } = qMIUI.message.rows[0];
 
-  // #3.3 검색하고자 하는 memberId가 있을 경우
+  EXEC_STEP = '3.3.'; // #3.3 검색하고자 하는 memberId가 있을 경우
   if (searchMemberId !== undefined) {
     const obQuery = {
       1: 'getSMFG1',
@@ -108,7 +110,7 @@ async function main(req, res) {
       resultCode: 200,
     });
   }
-  // #3.4 검색하고자 하는 memberId가 없을 경우
+  EXEC_STEP = '3.4.'; // #3.4 검색하고자 하는 memberId가 없을 경우
   let key;
   if (type === 'teacher' || type === 'guardian') {
     key = type;
