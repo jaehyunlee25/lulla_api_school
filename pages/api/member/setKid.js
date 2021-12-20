@@ -8,6 +8,7 @@ const QTS = {
   setKid: 'setKid',
   setSchoolRoles: 'setSchoolRoles',
   getSchoolRolesId: 'getSchoolRolesId',
+  getKidClass: 'getKidClass',
 };
 let EXEC_STEP = 0;
 const baseUrl = 'sqls/member/setKid'; // 끝에 슬래시 붙이지 마시오.
@@ -65,15 +66,34 @@ async function main(req, res) {
       id: 'ERR.member.setKid.3.4.1',
       message: 'no such member',
     });
-  const { kid_id: memberKidId } = qMIUI.message.rows[0];
+  const {
+    kid_id: memberKidId,
+    grade,
+    class_id: classId,
+  } = qMIUI.message.rows[0];
+
+  EXEC_STEP = '3.4.2.'; // #3.4.2 kid의 classId를 가져옴
+  const qKidClass = await QTS.getKidClass.fQuery(baseUrl, { kidId });
+  if (qKidClass.type === 'error')
+    return qKidClass.onError(res, '3.3.1', 'searching member');
+  const kidClassId = qKidClass.message.rows[0].kid_class_id;
 
   EXEC_STEP = '3.5.'; // #3.4 kid_id 유효성 검사
-  if (kidId !== memberKidId)
-    return ERROR(res, {
-      resultCode: 401,
-      id: 'ERR.member.setKid.3.5.1',
-      message: '해당하는 원생의 정보를 수정할 권한이 없습니다.',
-    });
+  if (grade > 4) {
+    if (kidId !== memberKidId)
+      return ERROR(res, {
+        resultCode: 401,
+        id: 'ERR.member.setKid.3.5.1',
+        message: '해당하는 원생의 정보를 수정할 권한이 없습니다.',
+      });
+  } else if (grade === 3 || grade === 4) {
+    if (kidClassId !== classId)
+      return ERROR(res, {
+        resultCode: 401,
+        id: 'ERR.member.setKid.3.5.1',
+        message: '해당하는 원생의 정보를 수정할 권한이 없습니다.',
+      });
+  }
 
   EXEC_STEP = '3.6.'; // #3.4 kid 조회
   const qGetKid = await QTS.getKid.fQuery(baseUrl, { kidId });
