@@ -104,7 +104,7 @@ async function main(req, res) {
   EXEC_STEP = '3.7.'; // #3.7 kid 정보 수정
   Object.keys(userKid).forEach((key) => {
     const val = userKid[key];
-    if (!val) return;
+    if (val === undefined) return;
     kid[key] = val;
   });
 

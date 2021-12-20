@@ -2,7 +2,7 @@ select
     id kid_id,
     name,
     gender,
-    birth,
+    to_char(birth, 'YYYY-MM-DD') birth,
     image_id,
     (select 
 	 	sr.name 
