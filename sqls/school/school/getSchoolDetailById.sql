@@ -27,7 +27,8 @@ select
                     c.school_id=s.id) tmp
             )
         ) class_data
-    )
+    ),
+    m.image_id school_image_id
 from 
     schools s 
     left join members m on m.school_id = s.id 
