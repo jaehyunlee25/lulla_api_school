@@ -1,4 +1,5 @@
 select
+    id kid_id,
     name,
     gender,
     birth,

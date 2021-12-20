@@ -120,12 +120,14 @@ async function main(req, res) {
   const schoolRolesId = qSRI.message.rows[0].school_role_id;
 
   EXEC_STEP = '3.10.'; // school_roles에 relation 정보 수정
-  const qSR = await QTS.setSchoolRoles.fQuery(baseUrl, {
-    schoolRolesId,
-    relation,
-  });
-  if (qSR.type === 'error')
-    return qSR.onError(res, '3.10.1', 'updating school_roles');
+  if (relation) {
+    const qSR = await QTS.setSchoolRoles.fQuery(baseUrl, {
+      schoolRolesId,
+      relation,
+    });
+    if (qSR.type === 'error')
+      return qSR.onError(res, '3.10.1', 'updating school_roles');
+  }
 
   EXEC_STEP = '3.11.'; // kid 정보 조회
   const qGet = await QTS.getKid.fQuery(baseUrl, { kidId });
