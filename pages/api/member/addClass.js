@@ -92,14 +92,14 @@ async function main(req, res) {
   const teacher = qMem.message.rows[0];
 
   const schoolId = teacher.school_id;
-  const classId = teacher.class_id;
+  // const classId = teacher.class_id;
   const roleName = teacher.role_name;
   const teacherUserId = teacher.user_id;
 
   EXEC_STEP = '3.2.6'; // 이미 등록된 반인지 체크
   const qCheck = await QTS.checkClass.fQuery(baseUrl, {
     userId: teacherUserId,
-    classId,
+    classId: userClassId,
   });
   if (qCheck.type === 'error')
     return qCheck.onError(res, '3.2.6.1', 'creating school roles');
